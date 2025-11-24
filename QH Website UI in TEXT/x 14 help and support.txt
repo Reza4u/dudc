@@ -1,0 +1,997 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .donate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .donate-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Page Title Section */
+        .page-title {
+            padding: 120px 0 60px;
+            background-color: var(--primary-bg);
+            position: relative;
+        }
+        
+        .page-title::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            z-index: -1;
+        }
+        
+        .page-title h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+        
+        .page-title p {
+            font-size: 18px;
+            color: #555;
+            max-width: 700px;
+        }
+        
+        /* Search Section */
+        .search-section {
+            padding: 0 0 60px;
+            background-color: var(--primary-bg);
+        }
+        
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 18px 25px 18px 60px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 24px;
+        }
+        
+        .search-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .search-suggestion {
+            background-color: var(--section-bg);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .search-suggestion:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        /* Help Categories */
+        .help-categories {
+            padding: 0 0 60px;
+            background-color: var(--primary-bg);
+        }
+        
+        .categories-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .category-card {
+            background-color: var(--section-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(13, 44, 84, 0.12);
+        }
+        
+        .category-card i {
+            font-size: 40px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .category-card:hover i {
+            transform: scale(1.1);
+        }
+        
+        .category-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .category-card p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* FAQ Section */
+        .faq-section {
+            padding: 0 0 60px;
+            background-color: var(--section-bg);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .section-header h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .section-header p {
+            font-size: 16px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .faq-question {
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+        
+        .faq-question:hover {
+            background-color: rgba(46, 196, 182, 0.05);
+        }
+        
+        .faq-question h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }
+        
+        .faq-question i {
+            color: var(--accent-color);
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-answer-content {
+            padding: 0 25px 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+        
+        /* Contact Section */
+        .contact-section {
+            padding: 0 0 60px;
+            background-color: var(--primary-bg);
+        }
+        
+        .contact-container {
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+        }
+        
+        .contact-info {
+            flex: 1;
+            background-color: var(--section-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .contact-info h2 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-info h2 i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .contact-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .contact-method {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .contact-method i {
+            font-size: 24px;
+            color: var(--accent-color);
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+        
+        .contact-method-content h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .contact-method-content p {
+            color: #666;
+        }
+        
+        .contact-form {
+            flex: 1;
+            background-color: var(--section-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .contact-form h2 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-form h2 i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .submit-button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .submit-button:hover {
+            background-color: #26a99d;
+        }
+        
+        .submit-button i {
+            margin-left: 10px;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 50px 0 30px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .contact-container {
+                flex-direction: column;
+            }
+        }
+        
+        /* Success Message */
+        .success-message {
+            display: none;
+            background-color: rgba(46, 196, 182, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .success-message i {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* No Results Message */
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="1 home.html" class="logo">
+                    <i class="fas fa-university"></i>
+                    DUDC Qarze Hasana
+                </a>
+                <ul class="nav-links">
+                    <li><a href="1 home.html">Home</a></li>
+                    <li><a href="2 about us.html">About</a></li>
+                    <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                    <li><a href="13 transperency and tracker.html">Transparency</a></li>
+                    <li><a href="14 help and support.html" class="text-accent-color font-semibold">Help</a></li>
+                </ul>
+                <a href="4 donation.html" class="donate-btn">দান করুন</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Title Section -->
+    <section class="page-title">
+        <div class="container">
+            <h1>Help & Support</h1>
+            <p>Find answers to your questions about our interest-free loan program, application process, and account management.</p>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search for help articles, FAQs, and more...">
+                </div>
+                <div class="search-suggestions">
+                    <a href="#" class="search-suggestion" data-search="How to apply">How to apply</a>
+                    <a href="#" class="search-suggestion" data-search="Loan eligibility">Loan eligibility</a>
+                    <a href="#" class="search-suggestion" data-search="Repayment options">Repayment options</a>
+                    <a href="#" class="search-suggestion" data-search="Account settings">Account settings</a>
+                    <a href="#" class="search-suggestion" data-search="Document requirements">Document requirements</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help Categories -->
+    <section class="help-categories">
+        <div class="container">
+            <div class="categories-container">
+                <div class="category-card" data-category="applications">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Applications</h3>
+                    <p>Learn about the application process, required documents, and eligibility criteria</p>
+                </div>
+                <div class="category-card" data-category="loans">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>Loans</h3>
+                    <p>Information about loan amounts, terms, and repayment options</p>
+                </div>
+                <div class="category-card" data-category="payments">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h3>Payments</h3>
+                    <p>How to make payments, payment schedules, and late payment policies</p>
+                </div>
+                <div class="category-card" data-category="account">
+                    <i class="fas fa-user"></i>
+                    <h3>Account</h3>
+                    <p>Manage your profile, update information, and account security</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+                <p>Find quick answers to common questions about our Qarze Hasana program</p>
+            </div>
+            
+            <div class="faq-container" id="faqContainer">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What is Qarze Hasana and how does it work?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            <p>Qarze Hasana is an Islamic concept of an interest-free loan given to help those in need. At DUDC Qarze Hasana, we provide financial assistance without charging any interest. The borrower only repays the principal amount they borrowed. This system is based on the Islamic principle of helping others without expecting financial gain in return.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Who is eligible to apply for a loan?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            <p>To be eligible for a loan from DUDC Qarze Hasana, you must:</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Be at least 18 years of age</li>
+                                <li>Have a valid identification document</li>
+                                <li>Provide proof of residence</li>
+                                <li>Demonstrate a genuine need for financial assistance</li>
+                                <li>Have the means to repay the loan within the agreed timeframe</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What documents are required for the loan application?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            <p>The following documents are typically required for a loan application:</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Completed application form</li>
+                                <li>Valid government-issued ID</li>
+                                <li>Proof of address (utility bill, lease agreement, etc.)</li>
+                                <li>Proof of income or financial need</li>
+                                <li>Two references with contact information</li>
+                                <li>Any additional documents specific to your loan purpose</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How long does it take to get a loan approved?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            <p>The loan approval process typically takes 7-10 business days from the date we receive your complete application. This timeframe may vary depending on the volume of applications and the completeness of your documentation. You can check the status of your application through your online account at any time.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What are the repayment options?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            <p>We offer flexible repayment options to suit your financial situation:</p>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                <li>Monthly installments over 6, 12, or 24 months</li>
+                                <li>Bi-weekly payments for shorter-term loans</li>
+                                <li>Early repayment without any penalties</li>
+                                <li>Online payment through our secure portal</li>
+                                <li>Bank transfer or direct deposit options</li>
+                            </ul>
+                            <p style="margin-top: 10px;">During the application process, we'll work with you to determine the most suitable repayment plan based on your financial circumstances.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="no-results" id="noResults">
+                    <i class="fas fa-search fa-2x mb-3 text-gray-400"></i>
+                    <p>No results found. Please try a different search term.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="container">
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h2><i class="fas fa-headset"></i> Contact Us</h2>
+                    
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <i class="fas fa-phone-alt"></i>
+                            <div class="contact-method-content">
+                                <h3>Phone Support</h3>
+                                <p>+1 (555) 123-4567<br>Monday-Friday, 9AM-5PM</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fas fa-envelope"></i>
+                            <div class="contact-method-content">
+                                <h3>Email Support</h3>
+                                <p>support@dudcqarzehasana.org<br>Response within 24 hours</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div class="contact-method-content">
+                                <h3>Visit Our Office</h3>
+                                <p>123 Community Street<br>City, State 12345</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <h2><i class="fas fa-comment-alt"></i> Send Us a Message</h2>
+                    
+                    <div class="success-message" id="successMessage">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Your message has been sent successfully! We'll get back to you soon.</span>
+                    </div>
+                    
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="contactName" placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="contactEmail" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select id="contactSubject">
+                                <option>General Inquiry</option>
+                                <option>Loan Application</option>
+                                <option>Repayment Question</option>
+                                <option>Technical Support</option>
+                                <option>Feedback</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea rows="5" id="contactMessage" placeholder="How can we help you?"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-button" id="contactSubmit">
+                            <span class="spinner" id="contactSpinner"></span>
+                            <span id="contactButtonText">Send Message</span>
+                            <i class="fas fa-paper-plane ml-2"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>About Us</h3>
+                    <ul>
+                        <li><a href="about-mission.html">Our Mission</a></li>
+                        <li><a href="about-team.html">Our Team</a></li>
+                        <li><a href="about-history.html">History</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>What We Do</h3>
+                    <ul>
+                        <li><a href="qarze-hasana.html">Qarze Hasana Program</a></li>
+                        <li><a href="apply-loan.html">Apply for Loan</a></li>
+                        <li><a href="eligibility.html">Eligibility Criteria</a></li>
+                        <li><a href="success-stories.html">Success Stories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Get Involved</h3>
+                    <ul>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="volunteer.html">Volunteer</a></li>
+                        <li><a href="partner.html">Partner With Us</a></li>
+                        <li><a href="events.html">Events</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="faq.html">FAQs</a></li>
+                        <li><a href="financial-literacy.html">Financial Literacy</a></li>
+                        <li><a href="annual-reports.html">Annual Reports</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 DUDC Qarze Hasana. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                
+                question.addEventListener('click', () => {
+                    // Close all other items
+                    faqItems.forEach(otherItem => {
+                        if (otherItem !== item) {
+                            otherItem.classList.remove('active');
+                        }
+                    });
+                    
+                    // Toggle current item
+                    item.classList.toggle('active');
+                });
+            });
+            
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const faqContainer = document.getElementById('faqContainer');
+            const noResults = document.getElementById('noResults');
+            const searchSuggestions = document.querySelectorAll('.search-suggestion');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                let hasResults = false;
+                
+                if (searchTerm.length > 0) {
+                    faqItems.forEach(item => {
+                        const question = item.querySelector('h3').textContent.toLowerCase();
+                        const answer = item.querySelector('.faq-answer-content').textContent.toLowerCase();
+                        
+                        if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                            item.style.display = 'block';
+                            hasResults = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                    
+                    if (hasResults) {
+                        noResults.style.display = 'none';
+                    } else {
+                        noResults.style.display = 'block';
+                    }
+                } else {
+                    faqItems.forEach(item => {
+                        item.style.display = 'block';
+                    });
+                    noResults.style.display = 'none';
+                }
+            });
+            
+            // Search suggestion clicks
+            searchSuggestions.forEach(suggestion => {
+                suggestion.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const searchTerm = this.getAttribute('data-search');
+                    searchInput.value = searchTerm;
+                    searchInput.dispatchEvent(new Event('input'));
+                });
+            });
+            
+            // Category card clicks
+            const categoryCards = document.querySelectorAll('.category-card');
+            categoryCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    searchInput.value = category;
+                    searchInput.dispatchEvent(new Event('input'));
+                    
+                    // Scroll to FAQ section
+                    document.querySelector('.faq-section').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+            
+            // Contact form submission
+            const contactForm = document.getElementById('contactForm');
+            const contactSubmit = document.getElementById('contactSubmit');
+            const contactSpinner = document.getElementById('contactSpinner');
+            const contactButtonText = document.getElementById('contactButtonText');
+            const successMessage = document.getElementById('successMessage');
+            
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                contactSpinner.style.display = 'inline-block';
+                contactButtonText.textContent = 'Sending...';
+                contactSubmit.disabled = true;
+                
+                // Simulate API call
+                setTimeout(function() {
+                    // Hide loading state
+                    contactSpinner.style.display = 'none';
+                    contactButtonText.textContent = 'Send Message';
+                    contactSubmit.disabled = false;
+                    
+                    // Show success message
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    contactForm.reset();
+                    
+                    // Scroll to success message
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>
+

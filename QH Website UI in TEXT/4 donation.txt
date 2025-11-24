@@ -1,0 +1,915 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .donate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .donate-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Page Title Section */
+        .page-title {
+            padding: 120px 0 60px;
+            background-color: var(--primary-bg);
+            position: relative;
+        }
+        
+        .page-title::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            z-index: -1;
+        }
+        
+        .page-title h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+        
+        .page-title p {
+            font-size: 18px;
+            color: #555;
+            max-width: 700px;
+        }
+        
+        /* Donation Section */
+        .donation-section {
+            padding: 0 0 80px;
+            background-color: var(--primary-bg);
+        }
+        
+        .donation-container {
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+        }
+        
+        .donation-form {
+            flex: 1;
+            background-color: var(--section-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .donation-form h2 {
+            font-size: 28px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .donation-form h2 i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .amount-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .amount-option {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .amount-option:hover,
+        .amount-option.active {
+            border-color: var(--accent-color);
+            background-color: rgba(46, 196, 182, 0.1);
+        }
+        
+        .custom-amount {
+            margin-top: 10px;
+        }
+        
+        .recurring-option {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .recurring-option input {
+            margin-right: 10px;
+        }
+        
+        .donate-button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .donate-button:hover {
+            background-color: #26a99d;
+            transform: translateY(-2px);
+        }
+        
+        .security-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .security-note i {
+            margin-right: 5px;
+            color: var(--highlight-color);
+        }
+        
+        /* Impact Cards */
+        .impact-cards {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .impact-card {
+            background-color: var(--section-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .impact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(13, 44, 84, 0.12);
+        }
+        
+        .impact-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d955401a9acd.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .impact-card-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .impact-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .impact-card h3 i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .impact-card p {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .impact-stat {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .impact-stat .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+        
+        .impact-stat .text {
+            font-size: 16px;
+            color: #555;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 4px;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 200px;
+            margin-top: 20px;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 50px 0 30px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .donation-container {
+                flex-direction: column;
+            }
+            
+            .amount-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Success Message */
+        .success-message {
+            display: none;
+            background-color: rgba(46, 196, 182, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        }
+        
+        .success-message i {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="1 home.html" class="logo">
+                    <i class="fas fa-university"></i>
+                    DUDC Qarze Hasana
+                </a>
+                <ul class="nav-links">
+                    <li><a href="1 home.html">Home</a></li>
+                    <li><a href="2 about us.html">About</a></li>
+                    <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                    <li><a href="13 transperency and tracker.html">Transparency</a></li>
+                    <li><a href="14 help and support.html">Help</a></li>
+                </ul>
+                <a href="4 donation.html" class="donate-btn">দান করুন</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Title Section -->
+    <section class="page-title">
+        <div class="container">
+            <h1>Make a Donation</h1>
+            <p>Your generous contribution helps us provide interest-free loans to those in need, creating a stronger and more financially stable community.</p>
+        </div>
+    </section>
+
+    <!-- Donation Section -->
+    <section class="donation-section">
+        <div class="container">
+            <div class="donation-container">
+                <!-- Donation Form -->
+                <div class="donation-form">
+                    <h2><i class="fas fa-hand-holding-heart"></i> Your Donation</h2>
+                    
+                    <div class="success-message" id="successMessage">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Thank you for your generous donation! Your contribution will make a real difference in our community.</span>
+                    </div>
+                    
+                    <form id="donationForm">
+                        <div class="form-group">
+                            <label>Donation Amount</label>
+                            <div class="amount-options">
+                                <div class="amount-option" data-amount="25">$25</div>
+                                <div class="amount-option" data-amount="50">$50</div>
+                                <div class="amount-option" data-amount="100">$100</div>
+                                <div class="amount-option" data-amount="250">$250</div>
+                            </div>
+                            <div class="custom-amount">
+                                <input type="text" id="donationAmount" placeholder="Enter custom amount" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fullName" placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="email" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phone" placeholder="Enter your phone number" required>
+                        </div>
+                        
+                        <div class="recurring-option">
+                            <input type="checkbox" id="recurring">
+                            <label for="recurring">Make this a monthly recurring donation</label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Payment Method</label>
+                            <select id="paymentMethod">
+                                <option>Credit Card</option>
+                                <option>Debit Card</option>
+                                <option>Bank Transfer</option>
+                                <option>PayPal</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="donate-button" id="donateButton">
+                            <span class="spinner" id="spinner"></span>
+                            <span id="buttonText">Donate Now</span>
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        
+                        <div class="security-note">
+                            <i class="fas fa-shield-alt"></i>
+                            Your donation is secure and encrypted
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Impact Cards -->
+                <div class="impact-cards">
+                    <div class="impact-card" onclick="showImpactDetails('education')">
+                        <div class="impact-card-content">
+                            <h3><i class="fas fa-graduation-cap"></i> Education Support</h3>
+                            <p>Your donation helps students pursue their education by covering tuition fees, books, and other educational expenses.</p>
+                            <div class="impact-stat">
+                                <div class="number">500+</div>
+                                <div class="text">Students supported through education loans</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="impact-card" onclick="showImpactDetails('housing')">
+                        <div class="impact-card-content">
+                            <h3><i class="fas fa-home"></i> Housing Assistance</h3>
+                            <p>Help families secure safe and stable housing by providing interest-free loans for home repairs and down payments.</p>
+                            <div class="impact-stat">
+                                <div class="number">300+</div>
+                                <div class="text">Families helped with housing needs</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 60%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="impact-card" onclick="showImpactDetails('business')">
+                        <div class="impact-card-content">
+                            <h3><i class="fas fa-briefcase"></i> Small Business Support</h3>
+                            <p>Empower entrepreneurs to start or grow their small businesses with interest-free loans for equipment and inventory.</p>
+                            <div class="impact-stat">
+                                <div class="number">200+</div>
+                                <div class="text">Small businesses supported</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="impact-card">
+                        <div class="impact-card-content">
+                            <h3><i class="fas fa-chart-pie"></i> Donation Impact</h3>
+                            <div class="chart-container">
+                                <canvas id="impactChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>About Us</h3>
+                    <ul>
+                        <li><a href="about-mission.html">Our Mission</a></li>
+                        <li><a href="about-team.html">Our Team</a></li>
+                        <li><a href="about-history.html">History</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>What We Do</h3>
+                    <ul>
+                        <li><a href="qarze-hasana.html">Qarze Hasana Program</a></li>
+                        <li><a href="apply-loan.html">Apply for Loan</a></li>
+                        <li><a href="eligibility.html">Eligibility Criteria</a></li>
+                        <li><a href="success-stories.html">Success Stories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Get Involved</h3>
+                    <ul>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="volunteer.html">Volunteer</a></li>
+                        <li><a href="partner.html">Partner With Us</a></li>
+                        <li><a href="events.html">Events</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="faq.html">FAQs</a></li>
+                        <li><a href="financial-literacy.html">Financial Literacy</a></li>
+                        <li><a href="annual-reports.html">Annual Reports</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 DUDC Qarze Hasana. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Enhanced donation form functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountOptions = document.querySelectorAll('.amount-option');
+            const donationAmountInput = document.getElementById('donationAmount');
+            const donationForm = document.getElementById('donationForm');
+            
+            // Amount selection functionality
+            amountOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    amountOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Add active class to clicked option
+                    this.classList.add('active');
+                    
+                    // Set the donation amount
+                    const amount = this.getAttribute('data-amount');
+                    donationAmountInput.value = amount;
+                    updateDonationImpact(amount);
+                });
+            });
+            
+            // Custom amount input handling
+            donationAmountInput.addEventListener('input', function() {
+                // Remove active class from preset amounts
+                amountOptions.forEach(opt => opt.classList.remove('active'));
+                updateDonationImpact(this.value);
+            });
+            
+            // Form submission with validation
+            if (donationForm) {
+                donationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const amount = parseFloat(donationAmountInput.value);
+                    const nameInput = this.querySelector('input[placeholder="Enter your full name"]');
+                    const emailInput = this.querySelector('input[type="email"]');
+                    
+                    let isValid = true;
+                    
+                    // Validate amount
+                    if (!amount || amount < 1) {
+                        showError(donationAmountInput, 'Please enter a valid donation amount');
+                        isValid = false;
+                    } else {
+                        clearError(donationAmountInput);
+                    }
+                    
+                    // Validate name
+                    if (!nameInput.value.trim()) {
+                        showError(nameInput, 'Please enter your name');
+                        isValid = false;
+                    } else {
+                        clearError(nameInput);
+                    }
+                    
+                    // Validate email
+                    if (!emailInput.value.trim()) {
+                        showError(emailInput, 'Please enter your email');
+                        isValid = false;
+                    } else if (!isValidEmail(emailInput.value)) {
+                        showError(emailInput, 'Please enter a valid email address');
+                        isValid = false;
+                    } else {
+                        clearError(emailInput);
+                    }
+                    
+                    if (isValid) {
+                        processDonation(amount, nameInput.value, emailInput.value);
+                    }
+                });
+            }
+            
+            function processDonation(amount, name, email) {
+                const submitButton = donationForm.querySelector('.donate-button');
+                const originalText = submitButton.innerHTML;
+                
+                // Show processing state
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitButton.disabled = true;
+                
+                // Simulate payment processing
+                setTimeout(() => {
+                    // Show success message
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'success-message';
+                    successMessage.style.cssText = `
+                        background: #27ae60;
+                        color: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                        text-align: center;
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        z-index: 10000;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    `;
+                    successMessage.innerHTML = `
+                        <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                        <h3>Thank You, ${name}!</h3>
+                        <p>Your donation of $${amount.toLocaleString()} has been processed successfully.</p>
+                        <p>You will receive a confirmation email at ${email}</p>
+                        <button onclick="this.parentElement.remove()" style="margin-top: 15px; padding: 10px 20px; background: white; color: #27ae60; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+                    `;
+                    
+                    document.body.appendChild(successMessage);
+                    
+                    // Reset form
+                    donationForm.reset();
+                    amountOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Reset button
+                    submitButton.innerHTML = originalText;
+                    submitButton.disabled = false;
+                }, 2000);
+            }
+            
+            function updateDonationImpact(amount) {
+                const impact = calculateImpact(amount);
+                const impactDisplay = document.querySelector('.impact-display');
+                if (impactDisplay) {
+                    impactDisplay.innerHTML = `
+                        <p>Your $${amount} donation could help:</p>
+                        <ul>
+                            <li>${impact.meals} meals for families in need</li>
+                            <li>${impact.books} educational books for students</li>
+                            <li>${impact.days} days of operational support</li>
+                        </ul>
+                    `;
+                }
+            }
+            
+            function calculateImpact(amount) {
+                const amt = parseFloat(amount) || 0;
+                return {
+                    meals: Math.floor(amt / 5),
+                    books: Math.floor(amt / 15),
+                    days: Math.floor(amt / 50)
+                };
+            }
+            
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            function showError(input, message) {
+                clearError(input);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.cssText = 'color: #e74c3c; font-size: 12px; margin-top: 5px;';
+                errorDiv.textContent = message;
+                input.parentNode.appendChild(errorDiv);
+                input.style.borderColor = '#e74c3c';
+            }
+            
+            function clearError(input) {
+                const errorMessage = input.parentNode.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+                input.style.borderColor = '';
+            }
+            
+            // Initialize impact chart
+            const chartCanvas = document.getElementById('impactChart');
+            if (chartCanvas) {
+                const ctx = chartCanvas.getContext('2d');
+                const impactChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Education', 'Housing', 'Business', 'Medical'],
+                        datasets: [{
+                            data: [35, 25, 30, 10],
+                            backgroundColor: [
+                                'rgba(46, 196, 182, 0.8)',
+                                'rgba(13, 44, 84, 0.8)',
+                                'rgba(242, 201, 76, 0.8)',
+                                'rgba(231, 76, 60, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(46, 196, 182, 1)',
+                                'rgba(13, 44, 84, 1)',
+                                'rgba(242, 201, 76, 1)',
+                                'rgba(231, 76, 60, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Function to show impact details
+            function showImpactDetails(type) {
+                // In a real application, this would navigate to a detailed page or show a modal
+                const impactDetails = {
+                    education: {
+                        title: 'Education Support',
+                        description: 'Our education loans have helped over 500 students pursue their dreams. From covering tuition fees to providing books and supplies, we ensure that financial barriers don\'t stand in the way of education.',
+                        stories: ['Ahmed was able to complete his engineering degree', 'Fatima pursued her medical studies', 'Omar attended vocational training']
+                    },
+                    housing: {
+                        title: 'Housing Assistance',
+                        description: 'Safe and stable housing is fundamental to wellbeing. Our housing loans help families make essential repairs, secure down payments, and improve living conditions.',
+                        stories: ['The Khan family repaired their roof before winter', 'Ali and Sara purchased their first home', 'Elderly residents made their homes accessible']
+                    },
+                    business: {
+                        title: 'Small Business Support',
+                        description: 'Small businesses are the backbone of our economy. Our loans help entrepreneurs start new ventures or expand existing ones, creating jobs and strengthening our community.',
+                        stories: ['Maria opened a bakery employing 5 people', 'Jamal expanded his grocery store', 'Aisha started a tailoring business from home']
+                    }
+                };
+                
+                const details = impactDetails[type];
+                if (details) {
+                    alert(`${details.title}\n\n${details.description}\n\nSuccess Stories:\n- ${details.stories.join('\n- ')}`);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

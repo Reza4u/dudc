@@ -1,0 +1,501 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--section-bg);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .donate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .donate-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Login Section */
+        .login-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 0 60px;
+        }
+        
+        .login-card {
+            background-color: var(--primary-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .card-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .card-header p {
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        
+        .checkbox-group .remember {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-group .remember input {
+            margin-right: 10px;
+        }
+        
+        .checkbox-group .remember label {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .checkbox-group .forgot a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .checkbox-group .forgot a:hover {
+            text-decoration: underline;
+        }
+        
+        .login-button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .login-button:hover {
+            background-color: #26a99d;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #eee;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+        
+        .social-login {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .social-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .social-btn:hover {
+            background-color: #f9f9f9;
+            border-color: #ccc;
+        }
+        
+        .social-btn i {
+            margin-right: 8px;
+            color: #555;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .register-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 30px 0;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+        }
+        
+        .footer-bottom {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="1 home.html" class="logo">
+                <i class="material-icons">account_balance</i>
+                DUDC Qarze Hasana
+            </a>
+            <ul class="nav-links">
+                <li><a href="1 home.html">Home</a></li>
+                <li><a href="2 about us.html">About</a></li>
+                <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                <li><a href="13 transperency and tracker.html">Transparency</a></li>
+                <li><a href="14 help and support.html">Help</a></li>
+            </ul>
+            <a href="4 donation.html" class="donate-btn">দান করুন</a>
+        </nav>
+    </header>
+
+    <!-- Login Section -->
+    <section class="login-section">
+        <div class="container">
+            <div class="login-card">
+                <div class="card-content">
+                    <div class="card-header">
+                        <h1>Welcome Back</h1>
+                        <p>Log in to access your DUDC Qarze Hasana account</p>
+                    </div>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" placeholder="Enter your password" required>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <div class="remember">
+                                <input type="checkbox" id="remember">
+                                <label for="remember">Remember me</label>
+                            </div>
+                            <div class="forgot">
+                                <a href="#">Forgot password?</a>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="login-button">Log In</button>
+                        
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+                        
+                        <div class="social-login">
+                            <div class="social-btn">
+                                <i class="material-icons">mail</i>
+                                <span>Email</span>
+                            </div>
+                            <div class="social-btn">
+                                <i class="material-icons">phone</i>
+                                <span>Phone</span>
+                            </div>
+                        </div>
+                        
+                        <div class="register-link">
+                            Don't have an account? <a href="6 sign up.html">Register</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 DUDC Qarze Hasana. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Login form validation and functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = loginForm.querySelector('input[type="email"]');
+            const passwordInput = loginForm.querySelector('input[type="password"]');
+            
+            // Form validation
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let isValid = true;
+                
+                // Validate email
+                if (!emailInput.value.trim()) {
+                    showError(emailInput, 'Email is required');
+                    isValid = false;
+                } else if (!isValidEmail(emailInput.value)) {
+                    showError(emailInput, 'Please enter a valid email address');
+                    isValid = false;
+                } else {
+                    clearError(emailInput);
+                }
+                
+                // Validate password
+                if (!passwordInput.value.trim()) {
+                    showError(passwordInput, 'Password is required');
+                    isValid = false;
+                } else if (passwordInput.value.length < 6) {
+                    showError(passwordInput, 'Password must be at least 6 characters');
+                    isValid = false;
+                } else {
+                    clearError(passwordInput);
+                }
+                
+                if (isValid) {
+                    // Simulate login process
+                    const submitButton = loginForm.querySelector('.login-button');
+                    submitButton.textContent = 'Logging in...';
+                    submitButton.disabled = true;
+                    
+                    setTimeout(() => {
+                        // Redirect to appropriate dashboard
+                        if (emailInput.value.includes('admin')) {
+                            window.location.href = '12 admin dashboard.html';
+                        } else {
+                            window.location.href = '7 user dashboard.html';
+                        }
+                    }, 1000);
+                }
+            });
+            
+            // Clear errors on input
+            [emailInput, passwordInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    clearError(this);
+                });
+            });
+            
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            function showError(input, message) {
+                clearError(input);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = '#e74c3c';
+                errorDiv.style.fontSize = '12px';
+                errorDiv.style.marginTop = '5px';
+                errorDiv.textContent = message;
+                input.parentNode.appendChild(errorDiv);
+                input.style.borderColor = '#e74c3c';
+            }
+            
+            function clearError(input) {
+                const errorMessage = input.parentNode.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+                input.style.borderColor = '';
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,1268 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparency / Money Tracker - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .donate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .donate-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Page Title Section */
+        .page-title {
+            padding: 120px 0 60px;
+            background-color: var(--primary-bg);
+            position: relative;
+        }
+        
+        .page-title::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            z-index: -1;
+        }
+        
+        .page-title h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+        
+        .page-title p {
+            font-size: 18px;
+            color: #555;
+            max-width: 700px;
+        }
+        
+        /* Transparency Stats Section */
+        .stats-section {
+            padding: 0 0 60px;
+            background-color: var(--primary-bg);
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background-color: var(--section-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(13, 44, 84, 0.12);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--accent-color);
+        }
+        
+        .stat-card .icon {
+            font-size: 36px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Transaction Table Section */
+        .transaction-section {
+            padding: 0 0 60px;
+            background-color: var(--section-bg);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .section-header h2 {
+            font-size: 28px;
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-options select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+        
+        .filter-options button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .filter-options button i {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .transaction-table thead {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .transaction-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .transaction-table th:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .transaction-table th i {
+            margin-left: 5px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .transaction-table tbody tr:nth-child(even) {
+            background-color: rgba(247, 248, 250, 0.5);
+        }
+        
+        .transaction-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        .transaction-table tbody tr:hover {
+            background-color: rgba(46, 196, 182, 0.1);
+            cursor: pointer;
+        }
+        
+        .transaction-table td {
+            padding: 15px;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transaction-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .transaction-id {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .transaction-type {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .transaction-type.donation {
+            background-color: rgba(46, 196, 182, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .transaction-type.disbursement {
+            background-color: rgba(13, 44, 84, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .transaction-type.repayment {
+            background-color: rgba(242, 201, 76, 0.1);
+            color: var(--highlight-color);
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+        }
+        
+        .transaction-amount.positive {
+            color: #2EC4B6;
+        }
+        
+        .transaction-amount.negative {
+            color: #E74C3C;
+        }
+        
+        /* Financial Report Section */
+        .report-section {
+            padding: 0 0 60px;
+            background-color: var(--primary-bg);
+        }
+        
+        .report-container {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .report-card {
+            flex: 1;
+            background-color: var(--section-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .report-card h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .report-card h3 i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .report-list {
+            list-style: none;
+        }
+        
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(13, 44, 84, 0.1);
+        }
+        
+        .report-item:last-child {
+            border-bottom: none;
+        }
+        
+        .report-label {
+            font-weight: 500;
+        }
+        
+        .report-value {
+            font-weight: 600;
+        }
+        
+        .report-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(13, 44, 84, 0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        /* Download Section */
+        .download-section {
+            padding: 0 0 60px;
+            background-color: var(--section-bg);
+        }
+        
+        .download-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .download-card {
+            background-color: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            width: 220px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .download-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(13, 44, 84, 0.12);
+        }
+        
+        .download-card i {
+            font-size: 36px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+        
+        .download-card h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .download-card p {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .download-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        .download-btn i {
+            margin-left: 5px;
+            font-size: 16px;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close:hover {
+            color: var(--primary-color);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 50px 0 30px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .filter-options {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .report-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="1 home.html" class="logo">
+                    <i class="fas fa-university"></i>
+                    DUDC Qarze Hasana
+                </a>
+                <ul class="nav-links">
+                    <li><a href="1 home.html">Home</a></li>
+                    <li><a href="2 about us.html">About</a></li>
+                    <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                    <li><a href="13 transperency and tracker.html" class="text-accent-color font-semibold">Transparency</a></li>
+                    <li><a href="14 help and support.html">Help</a></li>
+                </ul>
+                <a href="4 donation.html" class="donate-btn">দান করুন</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Title Section -->
+    <section class="page-title">
+        <div class="container">
+            <h1>Transparency & Money Tracker</h1>
+            <p>We believe in complete transparency. Track every donation, loan disbursement, and repayment in real-time.</p>
+        </div>
+    </section>
+
+    <!-- Transparency Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-hand-holding-heart"></i></div>
+                    <div class="number">$2.5M</div>
+                    <h3>Total Donations</h3>
+                    <p>Received from generous supporters</p>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-university"></i></div>
+                    <div class="number">$2.1M</div>
+                    <h3>Loans Disbursed</h3>
+                    <p>Interest-free loans to community members</p>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-coins"></i></div>
+                    <div class="number">$1.8M</div>
+                    <h3>Amount Repaid</h3>
+                    <p>Successfully returned by borrowers</p>
+                </div>
+                <div class="stat-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <div class="number">5,000+</div>
+                    <h3>Lives Impacted</h3>
+                    <p>Community members supported</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transaction Table Section -->
+    <section class="transaction-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Recent Transactions</h2>
+                <div class="filter-options">
+                    <select id="transactionFilter">
+                        <option value="all">All Transactions</option>
+                        <option value="donation">Donations</option>
+                        <option value="disbursement">Disbursements</option>
+                        <option value="repayment">Repayments</option>
+                    </select>
+                    <button id="exportBtn"><i class="fas fa-file-download"></i> Export</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="transaction-table" id="transactionTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Transaction ID <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)">Date <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(2)">Type <i class="fas fa-sort"></i></th>
+                            <th>Description</th>
+                            <th>From/To</th>
+                            <th onclick="sortTable(5)">Amount <i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        <tr onclick="showTransactionDetails('TRX-2025-0421')">
+                            <td class="transaction-id">TRX-2025-0421</td>
+                            <td>Apr 15, 2025</td>
+                            <td><span class="transaction-type donation">Donation</span></td>
+                            <td>Monthly Contribution</td>
+                            <td>Ahmed Khan</td>
+                            <td class="transaction-amount positive">+$250.00</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0420')">
+                            <td class="transaction-id">TRX-2025-0420</td>
+                            <td>Apr 14, 2025</td>
+                            <td><span class="transaction-type disbursement">Disbursement</span></td>
+                            <td>Education Loan</td>
+                            <td>Fatima Zahra</td>
+                            <td class="transaction-amount negative">-$3,000.00</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0419')">
+                            <td class="transaction-id">TRX-2025-0419</td>
+                            <td>Apr 13, 2025</td>
+                            <td><span class="transaction-type repayment">Repayment</span></td>
+                            <td>Monthly Installment</td>
+                            <td>Omar Hassan</td>
+                            <td class="transaction-amount positive">+$187.50</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0418')">
+                            <td class="transaction-id">TRX-2025-0418</td>
+                            <td>Apr 12, 2025</td>
+                            <td><span class="transaction-type donation">Donation</span></td>
+                            <td>One-time Contribution</td>
+                            <td>Aisha Ali</td>
+                            <td class="transaction-amount positive">+$500.00</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0417')">
+                            <td class="transaction-id">TRX-2025-0417</td>
+                            <td>Apr 11, 2025</td>
+                            <td><span class="transaction-type disbursement">Disbursement</span></td>
+                            <td>Business Loan</td>
+                            <td>Yusuf Ibrahim</td>
+                            <td class="transaction-amount negative">-$5,000.00</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0416')">
+                            <td class="transaction-id">TRX-2025-0416</td>
+                            <td>Apr 10, 2025</td>
+                            <td><span class="transaction-type repayment">Repayment</span></td>
+                            <td>Final Payment</td>
+                            <td>Sara Mahmoud</td>
+                            <td class="transaction-amount positive">+$1,200.00</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0415')">
+                            <td class="transaction-id">TRX-2025-0415</td>
+                            <td>Apr 9, 2025</td>
+                            <td><span class="transaction-type donation">Donation</span></td>
+                            <td>Monthly Contribution</td>
+                            <td>Mohammed Ali</td>
+                            <td class="transaction-amount positive">+$100.00</td>
+                        </tr>
+                        <tr onclick="showTransactionDetails('TRX-2025-0414')">
+                            <td class="transaction-id">TRX-2025-0414</td>
+                            <td>Apr 8, 2025</td>
+                            <td><span class="transaction-type disbursement">Disbursement</span></td>
+                            <td>Home Repair Loan</td>
+                            <td>Layla Hassan</td>
+                            <td class="transaction-amount negative">-$2,500.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Financial Report Section -->
+    <section class="report-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Financial Summary</h2>
+            </div>
+            
+            <div class="report-container">
+                <div class="report-card">
+                    <h3><i class="fas fa-arrow-up"></i> Funds Inflow</h3>
+                    <ul class="report-list">
+                        <li class="report-item">
+                            <span class="report-label">Individual Donations</span>
+                            <span class="report-value">$1,850,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Corporate Sponsorships</span>
+                            <span class="report-value">$500,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Loan Repayments</span>
+                            <span class="report-value">$150,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Fundraising Events</span>
+                            <span class="report-value">$50,000</span>
+                        </li>
+                        <li class="report-total">
+                            <span class="report-label">Total Inflow</span>
+                            <span class="report-value">$2,550,000</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="report-card">
+                    <h3><i class="fas fa-arrow-down"></i> Funds Outflow</h3>
+                    <ul class="report-list">
+                        <li class="report-item">
+                            <span class="report-label">Education Loans</span>
+                            <span class="report-value">$750,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Business Loans</span>
+                            <span class="report-value">$650,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Home Repair Loans</span>
+                            <span class="report-value">$500,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Medical Loans</span>
+                            <span class="report-value">$200,000</span>
+                        </li>
+                        <li class="report-total">
+                            <span class="report-label">Total Outflow</span>
+                            <span class="report-value">$2,100,000</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="report-card">
+                    <h3><i class="fas fa-wallet"></i> Current Status</h3>
+                    <ul class="report-list">
+                        <li class="report-item">
+                            <span class="report-label">Available Funds</span>
+                            <span class="report-value">$450,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Outstanding Loans</span>
+                            <span class="report-value">$300,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Administrative Costs</span>
+                            <span class="report-value">$50,000</span>
+                        </li>
+                        <li class="report-item">
+                            <span class="report-label">Program Development</span>
+                            <span class="report-value">$100,000</span>
+                        </li>
+                        <li class="report-total">
+                            <span class="report-label">Net Balance</span>
+                            <span class="report-value">$400,000</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div class="mt-8">
+                <div class="chart-container">
+                    <canvas id="financialChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Download Financial Reports</h2>
+            </div>
+            
+            <div class="download-container">
+                <div class="download-card" onclick="downloadReport('annual')">
+                    <i class="fas fa-file-pdf"></i>
+                    <h3>Annual Report 2024</h3>
+                    <p>Complete financial overview of 2024</p>
+                    <a href="#" class="download-btn">Download <i class="fas fa-arrow-down"></i></a>
+                </div>
+                
+                <div class="download-card" onclick="downloadReport('audit')">
+                    <i class="fas fa-file-invoice"></i>
+                    <h3>Audit Report</h3>
+                    <p>Independent audit certification</p>
+                    <a href="#" class="download-btn">Download <i class="fas fa-arrow-down"></i></a>
+                </div>
+                
+                <div class="download-card" onclick="downloadReport('quarterly')">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Quarterly Report Q1 2025</h3>
+                    <p>First quarter financial summary</p>
+                    <a href="#" class="download-btn">Download <i class="fas fa-arrow-down"></i></a>
+                </div>
+                
+                <div class="download-card" onclick="downloadReport('transactions')">
+                    <i class="fas fa-table"></i>
+                    <h3>Transaction Data</h3>
+                    <p>Complete transaction history (CSV)</p>
+                    <a href="#" class="download-btn">Download <i class="fas fa-arrow-down"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transaction Details Modal -->
+    <div id="transactionModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle" class="text-2xl font-bold mb-4">Transaction Details</h2>
+            <div id="modalContent" class="space-y-3">
+                <!-- Transaction details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>About Us</h3>
+                    <ul>
+                        <li><a href="about-mission.html">Our Mission</a></li>
+                        <li><a href="about-team.html">Our Team</a></li>
+                        <li><a href="about-history.html">History</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>What We Do</h3>
+                    <ul>
+                        <li><a href="qarze-hasana.html">Qarze Hasana Program</a></li>
+                        <li><a href="apply-loan.html">Apply for Loan</a></li>
+                        <li><a href="eligibility.html">Eligibility Criteria</a></li>
+                        <li><a href="success-stories.html">Success Stories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Get Involved</h3>
+                    <ul>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="volunteer.html">Volunteer</a></li>
+                        <li><a href="partner.html">Partner With Us</a></li>
+                        <li><a href="events.html">Events</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="faq.html">FAQs</a></li>
+                        <li><a href="financial-literacy.html">Financial Literacy</a></li>
+                        <li><a href="annual-reports.html">Annual Reports</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 DUDC Qarze Hasana. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Transaction data
+        const transactions = [
+            {
+                id: 'TRX-2025-0421',
+                date: 'Apr 15, 2025',
+                type: 'donation',
+                description: 'Monthly Contribution',
+                fromTo: 'Ahmed Khan',
+                amount: '+$250.00',
+                details: {
+                    method: 'Bank Transfer',
+                    reference: 'REF-2025-0421',
+                    notes: 'Monthly contribution as per donor schedule'
+                }
+            },
+            {
+                id: 'TRX-2025-0420',
+                date: 'Apr 14, 2025',
+                type: 'disbursement',
+                description: 'Education Loan',
+                fromTo: 'Fatima Zahra',
+                amount: '-$3,000.00',
+                details: {
+                    loanId: 'LN-2025-0456',
+                    term: '12 months',
+                    purpose: 'Tuition fees for university education'
+                }
+            },
+            {
+                id: 'TRX-2025-0419',
+                date: 'Apr 13, 2025',
+                type: 'repayment',
+                description: 'Monthly Installment',
+                fromTo: 'Omar Hassan',
+                amount: '+$187.50',
+                details: {
+                    loanId: 'LN-2025-0321',
+                    installment: '4 of 6',
+                    paymentMethod: 'Online Banking'
+                }
+            },
+            {
+                id: 'TRX-2025-0418',
+                date: 'Apr 12, 2025',
+                type: 'donation',
+                description: 'One-time Contribution',
+                fromTo: 'Aisha Ali',
+                amount: '+$500.00',
+                details: {
+                    method: 'Credit Card',
+                    reference: 'REF-2025-0418',
+                    notes: 'One-time donation for community support'
+                }
+            },
+            {
+                id: 'TRX-2025-0417',
+                date: 'Apr 11, 2025',
+                type: 'disbursement',
+                description: 'Business Loan',
+                fromTo: 'Yusuf Ibrahim',
+                amount: '-$5,000.00',
+                details: {
+                    loanId: 'LN-2025-0320',
+                    term: '24 months',
+                    purpose: 'Small business equipment purchase'
+                }
+            },
+            {
+                id: 'TRX-2025-0416',
+                date: 'Apr 10, 2025',
+                type: 'repayment',
+                description: 'Final Payment',
+                fromTo: 'Sara Mahmoud',
+                amount: '+$1,200.00',
+                details: {
+                    loanId: 'LN-2024-1128',
+                    installment: '8 of 8',
+                    paymentMethod: 'Cash Deposit'
+                }
+            },
+            {
+                id: 'TRX-2025-0415',
+                date: 'Apr 9, 2025',
+                type: 'donation',
+                description: 'Monthly Contribution',
+                fromTo: 'Mohammed Ali',
+                amount: '+$100.00',
+                details: {
+                    method: 'Bank Transfer',
+                    reference: 'REF-2025-0415',
+                    notes: 'Monthly contribution as per donor schedule'
+                }
+            },
+            {
+                id: 'TRX-2025-0414',
+                date: 'Apr 8, 2025',
+                type: 'disbursement',
+                description: 'Home Repair Loan',
+                fromTo: 'Layla Hassan',
+                amount: '-$2,500.00',
+                details: {
+                    loanId: 'LN-2025-0319',
+                    term: '6 months',
+                    purpose: 'Home renovation and repair'
+                }
+            }
+        ];
+        
+        // Filter functionality
+        document.getElementById('transactionFilter').addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.querySelectorAll('#transactionTableBody tr');
+            
+            rows.forEach(row => {
+                const typeCell = row.querySelector('.transaction-type');
+                if (filterValue === 'all' || typeCell.textContent.toLowerCase().includes(filterValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+        
+        // Sort table functionality
+        let sortDirection = {};
+        
+        function sortTable(columnIndex) {
+            const table = document.getElementById('transactionTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Toggle sort direction
+            sortDirection[columnIndex] = sortDirection[columnIndex] === 'asc' ? 'desc' : 'asc';
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent.trim();
+                const bValue = b.cells[columnIndex].textContent.trim();
+                
+                if (columnIndex === 5) { // Amount column
+                    const aNum = parseFloat(aValue.replace(/[$,+]/g, ''));
+                    const bNum = parseFloat(bValue.replace(/[$,+]/g, ''));
+                    
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aNum - bNum;
+                    } else {
+                        return bNum - aNum;
+                    }
+                } else {
+                    if (sortDirection[columnIndex] === 'asc') {
+                        return aValue.localeCompare(bValue);
+                    } else {
+                        return bValue.localeCompare(aValue);
+                    }
+                }
+            });
+            
+            // Reorder rows in tbody
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        // Show transaction details in modal
+        function showTransactionDetails(transactionId) {
+            const transaction = transactions.find(t => t.id === transactionId);
+            
+            if (transaction) {
+                const modal = document.getElementById('transactionModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalTitle.textContent = `Transaction Details - ${transaction.id}`;
+                
+                let contentHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-500">Date</p>
+                            <p class="font-medium">${transaction.date}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Type</p>
+                            <p class="font-medium">
+                                <span class="transaction-type ${transaction.type}">${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}</span>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Description</p>
+                            <p class="font-medium">${transaction.description}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">${transaction.type === 'donation' || transaction.type === 'repayment' ? 'From' : 'To'}</p>
+                            <p class="font-medium">${transaction.fromTo}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Amount</p>
+                            <p class="font-medium ${transaction.amount.startsWith('+') ? 'text-green-600' : 'text-red-600'}">${transaction.amount}</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Add additional details based on transaction type
+                if (transaction.details) {
+                    contentHTML += '<div class="mt-4 pt-4 border-t border-gray-200">';
+                    contentHTML += '<h3 class="font-medium mb-2">Additional Information</h3>';
+                    
+                    for (const [key, value] of Object.entries(transaction.details)) {
+                        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        contentHTML += `<div class="mb-2"><span class="text-gray-500">${formattedKey}:</span> <span class="font-medium">${value}</span></div>`;
+                    }
+                    
+                    contentHTML += '</div>';
+                }
+                
+                modalContent.innerHTML = contentHTML;
+                modal.style.display = 'block';
+            }
+        }
+        
+        // Close modal
+        document.querySelector('.close').addEventListener('click', function() {
+            document.getElementById('transactionModal').style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('transactionModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        
+        // Export functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            alert('In a real implementation, this would export the transaction data in CSV or PDF format.');
+        });
+        
+        // Download report functionality
+        function downloadReport(reportType) {
+            alert(`In a real implementation, this would download the ${reportType} report.`);
+        }
+        
+        // Initialize financial chart
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        const financialChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Donations', 'Corporate', 'Repayments', 'Events', 'Education', 'Business', 'Housing', 'Medical'],
+                datasets: [{
+                    label: 'Inflow',
+                    data: [1850000, 500000, 150000, 50000, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(46, 196, 182, 0.7)',
+                    borderColor: 'rgba(46, 196, 182, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Outflow',
+                    data: [0, 0, 0, 0, 750000, 650000, 500000, 200000],
+                    backgroundColor: 'rgba(13, 44, 84, 0.7)',
+                    borderColor: 'rgba(13, 44, 84, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += '$' + context.parsed.y.toLocaleString();
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

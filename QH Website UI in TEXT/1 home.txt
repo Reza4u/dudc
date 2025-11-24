@@ -1,0 +1,940 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUDC Qarze Hasana - Interest-Free Loans for Community Empowerment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+            font-size: 28px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .donate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .donate-btn:hover {
+            background-color: #26a99d;
+            transform: translateY(-2px);
+        }
+        
+        .donate-btn i {
+            margin-left: 8px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 180px 0 100px;
+            background-color: var(--primary-bg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/0ff0b78b4d36.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            z-index: -1;
+        }
+        
+        .hero-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+        
+        .hero-text {
+            flex: 1;
+            animation: fadeInLeft 1s ease-out;
+        }
+        
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeInRight 1s ease-out;
+        }
+        
+        .hero-image img {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.5s ease;
+        }
+        
+        .hero-image img:hover {
+            transform: scale(1.03);
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .hero h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background-color: var(--accent-color);
+        }
+        
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: #555;
+            max-width: 90%;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        
+        .primary-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            font-size: 18px;
+            box-shadow: 0 4px 6px rgba(46, 196, 182, 0.2);
+        }
+        
+        .primary-btn:hover {
+            background-color: #26a99d;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(46, 196, 182, 0.3);
+        }
+        
+        .primary-btn i {
+            margin-left: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .primary-btn:hover i {
+            transform: translateX(5px);
+        }
+        
+        .secondary-btn {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 13px 28px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .secondary-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        /* Impact Section */
+        .impact {
+            padding: 80px 0;
+            background-color: var(--section-bg);
+            position: relative;
+        }
+        
+        .impact::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section-title h2 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        
+        .section-title p {
+            font-size: 18px;
+            color: #555;
+            max-width: 700px;
+            margin: 20px auto 0;
+        }
+        
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: var(--accent-color);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(13, 44, 84, 0.12);
+        }
+        
+        .stat-card .number {
+            font-size: 56px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .stat-card .number::after {
+            content: '+';
+            position: absolute;
+            top: 0;
+            right: -15px;
+            font-size: 36px;
+            color: var(--highlight-color);
+        }
+        
+        .stat-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background-color: var(--primary-bg);
+        }
+        
+        .features-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            padding: 40px 30px;
+            border-radius: var(--border-radius);
+            background-color: var(--section-bg);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .feature-card:hover {
+            background-color: white;
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+        
+        .feature-card i {
+            font-size: 48px;
+            color: var(--accent-color);
+            margin-bottom: 25px;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover i {
+            transform: scale(1.1);
+        }
+        
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .feature-card p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary-color), #1a3d6e);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            z-index: 0;
+            border-radius: 50%;
+        }
+        
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta-content h2 {
+            font-size: 42px;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .cta-content p {
+            font-size: 20px;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .cta-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 18px 40px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 20px;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 196, 182, 0.3);
+        }
+        
+        .cta-btn:hover {
+            background-color: #26a99d;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(46, 196, 182, 0.4);
+        }
+        
+        .cta-btn i {
+            margin-left: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-btn:hover i {
+            transform: translateX(8px);
+        }
+        
+        /* Footer */
+        footer {
+            padding: 70px 0 30px;
+            background-color: var(--primary-color);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-color), var(--highlight-color));
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        .footer-column h3 {
+            font-size: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 12px;
+        }
+        
+        .footer-column h3::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--accent-color);
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-column ul li a {
+            color: #ddd;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .footer-column ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+        
+        .footer-column ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--accent-color);
+            transform: translateX(5px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Animations */
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Mobile Responsive */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(46, 196, 182, 0.3);
+            z-index: 1001;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        @media (max-width: 992px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero-image {
+                margin-top: 40px;
+            }
+            
+            .hero h1 {
+                font-size: 42px;
+            }
+            
+            .cta-buttons {
+                justify-content: center;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .primary-btn, .secondary-btn {
+                font-size: 16px;
+                padding: 12px 24px;
+            }
+            
+            .section-title h2 {
+                font-size: 36px;
+            }
+            
+            .stat-card {
+                padding: 30px 20px;
+            }
+            
+            .stat-card .number {
+                font-size: 42px;
+            }
+        }
+        
+        /* Islamic Pattern Background */
+        .islamic-pattern {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: contain;
+            opacity: 0.03;
+            z-index: -1;
+        }
+        
+        .pattern-1 {
+            top: 10%;
+            left: 5%;
+        }
+        
+        .pattern-2 {
+            bottom: 10%;
+            right: 5%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="1 home.html" class="logo">
+                    <i class="fas fa-university"></i>
+                    DUDC Qarze Hasana
+                </a>
+                <ul class="nav-links">
+                    <li><a href="1 home.html">Home</a></li>
+                    <li><a href="2 about us.html">About</a></li>
+                    <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                    <li><a href="13 transperency and tracker.html">Transparency</a></li>
+                    <li><a href="14 help and support.html">Help</a></li>
+                </ul>
+                <a href="4 donation.html" class="donate-btn">দান করুন <i class="fas fa-hand-holding-heart"></i></a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Empowering Communities Through Interest-Free Loans</h1>
+                    <p>DUDC Qarze Hasana provides financial support to those in need, following the Islamic principle of Qarze Hasana (beautiful loan) to help individuals and families achieve economic stability.</p>
+                    <div class="cta-buttons">
+                        <a href="3 apply for loan.html" class="primary-btn">Apply for a Loan <i class="fas fa-arrow-right"></i></a>
+                        <a href="2 about us.html" class="secondary-btn">Learn More</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://sfile.chatglm.cn/images-ppt/89c968aa4dc8.jpg" alt="Community support">
+                </div>
+            </div>
+        </div>
+        <div class="islamic-pattern pattern-1"></div>
+    </section>
+
+    <!-- Impact Section -->
+    <section class="impact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Public Impact</h2>
+                <p>Through our interest-free loan program, we've made a significant difference in the lives of many individuals and families in our community.</p>
+            </div>
+            <div class="impact-stats">
+                <div class="stat-card">
+                    <div class="number" data-target="5000">0</div>
+                    <h3>Loans Disbursed</h3>
+                    <p>Helping community members achieve their financial goals</p>
+                </div>
+                <div class="stat-card">
+                    <div class="number" data-target="98">0</div>
+                    <h3>Repayment Rate</h3>
+                    <p>Demonstrating trust and responsibility in our community</p>
+                </div>
+                <div class="stat-card">
+                    <div class="number" data-target="2.5">0</div>
+                    <h3>Total Funds Disbursed (Million $)</h3>
+                    <p>Supporting economic growth and stability</p>
+                </div>
+                <div class="stat-card">
+                    <div class="number" data-target="15">0</div>
+                    <h3>Years of Service</h3>
+                    <p>Committed to our community's wellbeing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>How We Help</h2>
+                <p>Our Qarze Hasana program is designed to provide financial assistance with dignity and respect.</p>
+            </div>
+            <div class="features-content">
+                <div class="feature-card">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>Interest-Free Loans</h3>
+                    <p>All our loans are completely interest-free, following Islamic financial principles and ensuring accessibility for those in need.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Flexible Repayment</h3>
+                    <p>We offer flexible repayment plans tailored to each individual's financial situation, making it easier to manage and repay loans.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Community Support</h3>
+                    <p>Beyond financial assistance, we provide guidance and support to help recipients achieve long-term financial stability.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Join Us in Making a Difference</h2>
+                <p>Your donation helps us provide interest-free loans to those in need, creating a stronger and more financially stable community.</p>
+                <a href="4 donation.html" class="cta-btn">Donate Today <i class="fas fa-heart"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>About Us</h3>
+                    <ul>
+                        <li><a href="2 about us.html">Our Mission</a></li>
+                        <li><a href="2 about us.html">Our Team</a></li>
+                        <li><a href="2 about us.html">History</a></li>
+                        <li><a href="14 help and support.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>What We Do</h3>
+                    <ul>
+                        <li><a href="2 about us.html">Qarze Hasana Program</a></li>
+                        <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                        <li><a href="14 help and support.html">Eligibility Criteria</a></li>
+                        <li><a href="2 about us.html">Success Stories</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Get Involved</h3>
+                    <ul>
+                        <li><a href="4 donation.html">Donate</a></li>
+                        <li><a href="14 help and support.html">Volunteer</a></li>
+                        <li><a href="14 help and support.html">Partner With Us</a></li>
+                        <li><a href="14 help and support.html">Events</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="14 help and support.html">FAQs</a></li>
+                        <li><a href="14 help and support.html">Financial Literacy</a></li>
+                        <li><a href="13 transperency and tracker.html">Annual Reports</a></li>
+                        <li><a href="14 help and support.html">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 DUDC Qarze Hasana. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <script>
+        // Counter Animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const counters = document.querySelectorAll('.number');
+            const speed = 200;
+            
+            const countUp = () => {
+                counters.forEach(counter => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const inc = target / speed;
+                    
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(countUp, 1);
+                    } else {
+                        counter.innerText = target;
+                    }
+                });
+            };
+            
+            // Intersection Observer for triggering counter animation
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5
+            };
+            
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        countUp();
+                        observer.unobserve(entry.target);
+                    }
+                });
+            };
+            
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+            const impactSection = document.querySelector('.impact');
+            if (impactSection) {
+                observer.observe(impactSection);
+            }
+        });
+        
+        // Mobile menu toggle functionality would go here
+        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+            // Implementation for mobile menu toggle
+            alert('Mobile menu would open here in a full implementation');
+        });
+    </script>
+</body>
+</html>
+

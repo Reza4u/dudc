@@ -1,0 +1,543 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--section-bg);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+        
+        .donate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .donate-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Registration Section */
+        .registration-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 0 60px;
+        }
+        
+        .registration-card {
+            background-color: var(--primary-bg);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .registration-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            z-index: 0;
+        }
+        
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .card-header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .card-header p {
+            color: #555;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .checkbox-group input {
+            margin-right: 10px;
+        }
+        
+        .checkbox-group label {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .register-button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .register-button:hover {
+            background-color: #26a99d;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .login-link a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 30px 0;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+        }
+        
+        .footer-bottom {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="1 home.html" class="logo">
+                <i class="material-icons">account_balance</i>
+                DUDC Qarze Hasana
+            </a>
+            <ul class="nav-links">
+                <li><a href="1 home.html">Home</a></li>
+                <li><a href="2 about us.html">About</a></li>
+                <li><a href="3 apply for loan.html">Apply for Loan</a></li>
+                <li><a href="13 transperency and tracker.html">Transparency</a></li>
+                <li><a href="14 help and support.html">Help</a></li>
+            </ul>
+            <a href="4 donation.html" class="donate-btn">দান করুন</a>
+        </nav>
+    </header>
+
+    <!-- Registration Section -->
+    <section class="registration-section">
+        <div class="container">
+            <div class="registration-card">
+                <div class="card-content">
+                    <div class="card-header">
+                        <h1>Create Account</h1>
+                        <p>Join DUDC Qarze Hasana to access interest-free loans and financial support</p>
+                    </div>
+                    
+                    <form id="registrationForm">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" placeholder="Enter your phone number" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" placeholder="Create a password" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <input type="password" placeholder="Confirm your password" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Account Type</label>
+                            <select>
+                                <option>Individual</option>
+                                <option>Family</option>
+                                <option>Small Business</option>
+                                <option>Organization</option>
+                            </select>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms">I agree to the Terms of Service and Privacy Policy</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="updates">
+                            <label for="updates">I would like to receive updates about DUDC Qarze Hasana</label>
+                        </div>
+                        
+                        <button type="submit" class="register-button">Create Account</button>
+                        
+                        <div class="login-link">
+                            Already have an account? <a href="5 log in.html">Log in</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 DUDC Qarze Hasana. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Registration form validation and functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.querySelector('form');
+            const nameInput = registerForm.querySelector('input[placeholder="Enter your full name"]');
+            const emailInput = registerForm.querySelector('input[type="email"]');
+            const phoneInput = registerForm.querySelector('input[placeholder="Enter your phone number"]');
+            const dobInput = registerForm.querySelector('input[type="date"]');
+            const genderSelect = registerForm.querySelector('select');
+            const passwordInput = registerForm.querySelector('input[type="password"]');
+            const termsCheckbox = registerForm.querySelector('input[type="checkbox"]');
+            
+            // Form validation
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let isValid = true;
+                
+                // Validate name
+                if (!nameInput.value.trim()) {
+                    showError(nameInput, 'Full name is required');
+                    isValid = false;
+                } else if (nameInput.value.trim().length < 2) {
+                    showError(nameInput, 'Name must be at least 2 characters');
+                    isValid = false;
+                } else {
+                    clearError(nameInput);
+                }
+                
+                // Validate email
+                if (!emailInput.value.trim()) {
+                    showError(emailInput, 'Email is required');
+                    isValid = false;
+                } else if (!isValidEmail(emailInput.value)) {
+                    showError(emailInput, 'Please enter a valid email address');
+                    isValid = false;
+                } else {
+                    clearError(emailInput);
+                }
+                
+                // Validate phone
+                if (!phoneInput.value.trim()) {
+                    showError(phoneInput, 'Phone number is required');
+                    isValid = false;
+                } else if (!isValidPhone(phoneInput.value)) {
+                    showError(phoneInput, 'Please enter a valid phone number');
+                    isValid = false;
+                } else {
+                    clearError(phoneInput);
+                }
+                
+                // Validate date of birth
+                if (!dobInput.value) {
+                    showError(dobInput, 'Date of birth is required');
+                    isValid = false;
+                } else if (!isValidAge(dobInput.value)) {
+                    showError(dobInput, 'You must be at least 18 years old');
+                    isValid = false;
+                } else {
+                    clearError(dobInput);
+                }
+                
+                // Validate gender
+                if (!genderSelect.value) {
+                    showError(genderSelect, 'Please select your gender');
+                    isValid = false;
+                } else {
+                    clearError(genderSelect);
+                }
+                
+                // Validate password
+                if (!passwordInput.value.trim()) {
+                    showError(passwordInput, 'Password is required');
+                    isValid = false;
+                } else if (passwordInput.value.length < 8) {
+                    showError(passwordInput, 'Password must be at least 8 characters');
+                    isValid = false;
+                } else if (!isStrongPassword(passwordInput.value)) {
+                    showError(passwordInput, 'Password must contain at least one uppercase letter, one lowercase letter, and one number');
+                    isValid = false;
+                } else {
+                    clearError(passwordInput);
+                }
+                
+                // Validate terms checkbox
+                if (!termsCheckbox.checked) {
+                    showError(termsCheckbox, 'You must accept the terms and conditions');
+                    isValid = false;
+                } else {
+                    clearError(termsCheckbox);
+                }
+                
+                if (isValid) {
+                    // Simulate registration process
+                    const submitButton = registerForm.querySelector('.register-button');
+                    submitButton.textContent = 'Creating Account...';
+                    submitButton.disabled = true;
+                    
+                    setTimeout(() => {
+                        alert('Account created successfully! You can now log in.');
+                        window.location.href = '5 log in.html';
+                    }, 1500);
+                }
+            });
+            
+            // Clear errors on input
+            [nameInput, emailInput, phoneInput, dobInput, genderSelect, passwordInput, termsCheckbox].forEach(input => {
+                input.addEventListener('input', function() {
+                    clearError(this);
+                });
+                input.addEventListener('change', function() {
+                    clearError(this);
+                });
+            });
+            
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            function isValidPhone(phone) {
+                const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,15}$/;
+                return phoneRegex.test(phone.replace(/\s/g, ''));
+            }
+            
+            function isValidAge(dateString) {
+                const today = new Date();
+                const birthDate = new Date(dateString);
+                const age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    return age - 1 >= 18;
+                }
+                return age >= 18;
+            }
+            
+            function isStrongPassword(password) {
+                const hasUpper = /[A-Z]/.test(password);
+                const hasLower = /[a-z]/.test(password);
+                const hasNumber = /\d/.test(password);
+                return hasUpper && hasLower && hasNumber;
+            }
+            
+            function showError(input, message) {
+                clearError(input);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = '#e74c3c';
+                errorDiv.style.fontSize = '12px';
+                errorDiv.style.marginTop = '5px';
+                errorDiv.textContent = message;
+                input.parentNode.appendChild(errorDiv);
+                input.style.borderColor = '#e74c3c';
+            }
+            
+            function clearError(input) {
+                const errorMessage = input.parentNode.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+                input.style.borderColor = '';
+            }
+        });
+    </script>
+</body>
+</html>
+

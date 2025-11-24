@@ -1,0 +1,947 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Loans - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles (same as previous page) */
+        .sidebar {
+            width: 280px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 30px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 30px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .user-info h3 {
+            color: white;
+            font-size: 16px;
+        }
+        
+        .user-info p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 15px 30px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background-color: rgba(46, 196, 182, 0.2);
+            color: white;
+        }
+        
+        .sidebar-nav a i {
+            margin-right: 15px;
+            width: 20px;
+        }
+        
+        .sidebar-cta {
+            margin-top: 30px;
+            padding: 0 30px;
+        }
+        
+        .sidebar-cta a {
+            display: block;
+            background: linear-gradient(135deg, var(--accent-color), var(--highlight-color));
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .sidebar-cta a:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background-color: var(--section-bg);
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .content-header h1 {
+            font-size: 28px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn i {
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #26a99d;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid #e1e5e9;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--section-bg);
+        }
+        
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .summary-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .summary-card.total-loans i {
+            color: var(--accent-color);
+        }
+        
+        .summary-card.total-amount i {
+            color: var(--highlight-color);
+        }
+        
+        .summary-card.paid-amount i {
+            color: #28a745;
+        }
+        
+        .summary-card.remaining i {
+            color: #dc3545;
+        }
+        
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .summary-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Loan Cards */
+        .loans-grid {
+            display: grid;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .loan-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+        
+        .loan-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 44, 84, 0.12);
+        }
+        
+        .loan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+        
+        .loan-info h3 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .loan-id {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .loan-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .loan-status.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .loan-status.overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .loan-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .detail-group {
+            text-align: center;
+            padding: 15px;
+            background: var(--section-bg);
+            border-radius: 8px;
+        }
+        
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        /* Progress Bar */
+        .progress-section {
+            margin-bottom: 25px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: between;
+            margin-bottom: 10px;
+        }
+        
+        .progress-info {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--highlight-color));
+            transition: width 0.3s ease;
+        }
+        
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Payment Schedule */
+        .payment-schedule {
+            margin-top: 20px;
+        }
+        
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .schedule-toggle {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .schedule-table.show {
+            display: table;
+        }
+        
+        .schedule-table th,
+        .schedule-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .schedule-table th {
+            background-color: var(--section-bg);
+            font-weight: 600;
+        }
+        
+        .payment-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .payment-status.paid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .payment-status.upcoming {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .payment-status.overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* Loan Actions */
+        .loan-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+        
+        .chart-header {
+            margin-bottom: 20px;
+        }
+        
+        .chart-canvas {
+            height: 300px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 1000;
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .loan-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .loan-actions {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+        
+        @media (max-width: 992px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="1 home.html" class="logo">
+                    <i class="fas fa-university"></i>
+                    DUDC Qarze Hasana
+                </a>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">AK</div>
+                <div class="user-info">
+                    <h3>Ahmed Khan</h3>
+                    <p>Individual Account</p>
+                </div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a href="7 user dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="8 my applications.html"><i class="fas fa-file-alt"></i> My Applications</a></li>
+                <li><a href="9 active loans.html" class="active"><i class="fas fa-wallet"></i> Active Loans</a></li>
+                <li><a href="10 repayments.html"><i class="fas fa-money-bill-wave"></i> Repayments</a></li>
+                <li><a href="11 profile settings.html"><i class="fas fa-user"></i> Profile Settings</a></li>
+                <li><a href="14 help and support.html"><i class="fas fa-question-circle"></i> Help & Support</a></li>
+            </ul>
+            
+            <div class="sidebar-cta">
+                <a href="3 apply for loan.html">Apply for New Loan</a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>Active Loans</h1>
+                <div class="header-actions">
+                    <a href="10 repayments.html" class="btn btn-secondary">
+                        <i class="fas fa-money-bill-wave"></i> Make Payment
+                    </a>
+                    <a href="3 apply for loan.html" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Loan
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card total-loans">
+                    <i class="fas fa-file-contract"></i>
+                    <div class="summary-value">2</div>
+                    <div class="summary-label">Active Loans</div>
+                </div>
+                <div class="summary-card total-amount">
+                    <i class="fas fa-dollar-sign"></i>
+                    <div class="summary-value">$8,000</div>
+                    <div class="summary-label">Total Borrowed</div>
+                </div>
+                <div class="summary-card paid-amount">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="summary-value">$3,200</div>
+                    <div class="summary-label">Amount Paid</div>
+                </div>
+                <div class="summary-card remaining">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="summary-value">$4,800</div>
+                    <div class="summary-label">Remaining Balance</div>
+                </div>
+            </div>
+            
+            <!-- Loan Overview Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Loan Repayment Progress</h3>
+                </div>
+                <canvas id="loanChart" class="chart-canvas"></canvas>
+            </div>
+            
+            <!-- Loans Grid -->
+            <div class="loans-grid">
+                <!-- Loan Card 1 -->
+                <div class="loan-card">
+                    <div class="loan-header">
+                        <div class="loan-info">
+                            <h3>Education Support Loan</h3>
+                            <div class="loan-id">Loan ID: #LOAN-2024-001</div>
+                        </div>
+                        <span class="loan-status active">Active</span>
+                    </div>
+                    
+                    <div class="loan-details">
+                        <div class="detail-group">
+                            <div class="detail-value">$3,000</div>
+                            <div class="detail-label">Original Amount</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-value">$1,200</div>
+                            <div class="detail-label">Remaining Balance</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-value">$166.67</div>
+                            <div class="detail-label">Monthly Payment</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-value">7</div>
+                            <div class="detail-label">Payments Left</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <h4>Repayment Progress</h4>
+                            <span class="progress-info">60% Complete</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span>Paid: $1,800</span>
+                            <span>Remaining: $1,200</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-schedule">
+                        <div class="schedule-header">
+                            <h4>Payment Schedule</h4>
+                            <button class="schedule-toggle" onclick="toggleSchedule('schedule1')">
+                                <i class="fas fa-chevron-down"></i> View Schedule
+                            </button>
+                        </div>
+                        <table class="schedule-table" id="schedule1">
+                            <thead>
+                                <tr>
+                                    <th>Payment #</th>
+                                    <th>Due Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>12</td>
+                                    <td>Jan 28, 2025</td>
+                                    <td>$166.67</td>
+                                    <td><span class="payment-status upcoming">Upcoming</span></td>
+                                </tr>
+                                <tr>
+                                    <td>13</td>
+                                    <td>Feb 28, 2025</td>
+                                    <td>$166.67</td>
+                                    <td><span class="payment-status upcoming">Upcoming</span></td>
+                                </tr>
+                                <tr>
+                                    <td>14</td>
+                                    <td>Mar 28, 2025</td>
+                                    <td>$166.67</td>
+                                    <td><span class="payment-status upcoming">Upcoming</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="loan-actions">
+                        <button class="btn btn-outline btn-small" onclick="downloadStatement('LOAN-2024-001')">
+                            <i class="fas fa-download"></i> Statement
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="viewDetails('LOAN-2024-001')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <a href="10 repayments.html" class="btn btn-primary btn-small">
+                            <i class="fas fa-credit-card"></i> Make Payment
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Loan Card 2 -->
+                <div class="loan-card">
+                    <div class="loan-header">
+                        <div class="loan-info">
+                            <h3>Business Expansion Loan</h3>
+                            <div class="loan-id">Loan ID: #LOAN-2024-002</div>
+                        </div>
+                        <span class="loan-status active">Active</span>
+                    </div>
+                    
+                    <div class="loan-details">
+                        <div class="detail-group">
+                            <div class="detail-value">$5,000</div>
+                            <div class="detail-label">Original Amount</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-value">$3,600</div>
+                            <div class="detail-label">Remaining Balance</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-value">$208.33</div>
+                            <div class="detail-label">Monthly Payment</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-value">17</div>
+                            <div class="detail-label">Payments Left</div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <h4>Repayment Progress</h4>
+                            <span class="progress-info">28% Complete</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 28%"></div>
+                        </div>
+                        <div class="progress-stats">
+                            <span>Paid: $1,400</span>
+                            <span>Remaining: $3,600</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-schedule">
+                        <div class="schedule-header">
+                            <h4>Payment Schedule</h4>
+                            <button class="schedule-toggle" onclick="toggleSchedule('schedule2')">
+                                <i class="fas fa-chevron-down"></i> View Schedule
+                            </button>
+                        </div>
+                        <table class="schedule-table" id="schedule2">
+                            <thead>
+                                <tr>
+                                    <th>Payment #</th>
+                                    <th>Due Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>8</td>
+                                    <td>Jan 15, 2025</td>
+                                    <td>$208.33</td>
+                                    <td><span class="payment-status upcoming">Upcoming</span></td>
+                                </tr>
+                                <tr>
+                                    <td>9</td>
+                                    <td>Feb 15, 2025</td>
+                                    <td>$208.33</td>
+                                    <td><span class="payment-status upcoming">Upcoming</span></td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td>Mar 15, 2025</td>
+                                    <td>$208.33</td>
+                                    <td><span class="payment-status upcoming">Upcoming</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="loan-actions">
+                        <button class="btn btn-outline btn-small" onclick="downloadStatement('LOAN-2024-002')">
+                            <i class="fas fa-download"></i> Statement
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="viewDetails('LOAN-2024-002')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <a href="10 repayments.html" class="btn btn-primary btn-small">
+                            <i class="fas fa-credit-card"></i> Make Payment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <script>
+        // Mobile menu functionality
+        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Initialize loan progress chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('loanChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Education Loan Payments',
+                            data: [0, 166.67, 333.34, 500.01, 666.68, 833.35, 1000.02, 1166.69, 1333.36, 1500.03, 1666.70, 1833.37],
+                            borderColor: '#2EC4B6',
+                            backgroundColor: 'rgba(46, 196, 182, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Business Loan Payments',
+                            data: [0, 0, 0, 0, 0, 208.33, 416.66, 624.99, 833.32, 1041.65, 1249.98, 1458.31],
+                            borderColor: '#F2C94C',
+                            backgroundColor: 'rgba(242, 201, 76, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Cumulative Loan Payments Over Time'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Toggle payment schedule visibility
+        function toggleSchedule(scheduleId) {
+            const table = document.getElementById(scheduleId);
+            const button = table.previousElementSibling.querySelector('.schedule-toggle');
+            const icon = button.querySelector('i');
+            
+            if (table.classList.contains('show')) {
+                table.classList.remove('show');
+                icon.className = 'fas fa-chevron-down';
+                button.innerHTML = '<i class="fas fa-chevron-down"></i> View Schedule';
+            } else {
+                table.classList.add('show');
+                icon.className = 'fas fa-chevron-up';
+                button.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Schedule';
+            }
+        }
+        
+        // Loan action functions
+        function downloadStatement(loanId) {
+            alert(`Downloading statement for ${loanId}. In a real application, this would generate and download a PDF statement.`);
+        }
+        
+        function viewDetails(loanId) {
+            alert(`Viewing detailed information for ${loanId}. In a real application, this would show a detailed loan information modal or page.`);
+        }
+        
+        // Auto-update progress bars with animation
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }
+        
+        // Initialize animations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(animateProgressBars, 500);
+        });
+    </script>
+</body>
+</html>
+

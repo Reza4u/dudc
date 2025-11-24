@@ -1,0 +1,1139 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DUDC Qarze Hasana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-bg: #FFFFFF;
+            --section-bg: #F7F8FA;
+            --primary-color: #0D2C54;
+            --accent-color: #2EC4B6;
+            --highlight-color: #F2C94C;
+            --border-radius: 10px;
+            --shadow: 0 4px 12px rgba(13, 44, 84, 0.08);
+            --urgent-color: #E74C3C;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            background-color: var(--primary-bg);
+            line-height: 1.6;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--section-bg);
+            padding: 30px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 0 25px 30px;
+            border-bottom: 1px solid rgba(13, 44, 84, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-transform: uppercase;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 0 25px;
+            margin-bottom: 30px;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        
+        .user-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .user-info p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+        
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background-color: rgba(46, 196, 182, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .sidebar-nav a i {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+        
+        .sidebar-cta {
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .sidebar-cta a {
+            display: block;
+            background-color: var(--accent-color);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .sidebar-cta a:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 30px;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .content-header h1 {
+            font-size: 28px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #26a99d;
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(13, 44, 84, 0.05);
+        }
+        
+        .btn-urgent {
+            background-color: var(--urgent-color);
+            color: white;
+        }
+        
+        .btn-urgent:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: var(--primary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-icon.blue {
+            background-color: rgba(13, 44, 84, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .card-icon.green {
+            background-color: rgba(46, 196, 182, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .card-icon.gold {
+            background-color: rgba(242, 201, 76, 0.1);
+            color: var(--highlight-color);
+        }
+        
+        .card-icon.red {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--urgent-color);
+        }
+        
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .card-change {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-change.positive {
+            color: #2EC4B6;
+        }
+        
+        .card-change.negative {
+            color: #E74C3C;
+        }
+        
+        .card-change i {
+            font-size: 16px;
+            margin-right: 5px;
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .progress-fill.blue {
+            background-color: var(--primary-color);
+        }
+        
+        .progress-fill.green {
+            background-color: var(--accent-color);
+        }
+        
+        .progress-fill.gold {
+            background-color: var(--highlight-color);
+        }
+        
+        .progress-fill.red {
+            background-color: var(--urgent-color);
+        }
+        
+        /* Action Required Section (Prominent) */
+        .action-required {
+            background: linear-gradient(135deg, var(--primary-color), #1a3d6e);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 16px rgba(13, 44, 84, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-required::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background-image: url('https://sfile.chatglm.cn/images-ppt/d7e7b1a26567.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            z-index: 0;
+        }
+        
+        .action-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .action-header h2 {
+            font-size: 24px;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .action-header h2 i {
+            margin-right: 10px;
+            color: var(--highlight-color);
+        }
+        
+        .action-badge {
+            background-color: var(--urgent-color);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+        
+        .action-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .action-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .action-item:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+        
+        .action-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .action-item-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .action-item-count {
+            background-color: var(--urgent-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .action-item-description {
+            font-size: 14px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        
+        .action-item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .action-item-time {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        .action-item-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .action-item-btn:hover {
+            background-color: #26a99d;
+        }
+        
+        /* Dashboard Sections */
+        .dashboard-section {
+            background-color: var(--primary-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            font-size: 20px;
+        }
+        
+        .section-header a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Application Status Table */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        table th {
+            text-align: left;
+            padding: 12px 15px;
+            background-color: var(--section-bg);
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--primary-color);
+            border-bottom: 1px solid rgba(13, 44, 84, 0.1);
+        }
+        
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.pending {
+            background-color: rgba(242, 201, 76, 0.1);
+            color: var(--highlight-color);
+        }
+        
+        .status-badge.approved {
+            background-color: rgba(46, 196, 182, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .status-badge.rejected {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--urgent-color);
+        }
+        
+        /* Recent Activity */
+        .activity-list {
+            list-style: none;
+        }
+        
+        .activity-item {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .activity-icon.blue {
+            background-color: rgba(13, 44, 84, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .activity-icon.green {
+            background-color: rgba(46, 196, 182, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .activity-icon.red {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--urgent-color);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(46, 196, 182, 0.3);
+            z-index: 1001;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+            
+            .action-items {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-university"></i>
+                    DUDC Qarze Hasana
+                    <span class="admin-badge">Admin</span>
+                </a>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar">SK</div>
+                <div class="user-info">
+                    <h3>Sara Khan</h3>
+                    <p>Administrator</p>
+                </div>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a href="12 admin dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="3 apply for loan.html"><i class="fas fa-file-alt"></i> Applications</a></li>
+                <li><a href="13 transperency and tracker.html"><i class="fas fa-wallet"></i> Loans</a></li>
+                <li><a href="14 help and support.html"><i class="fas fa-users"></i> Users</a></li>
+                <li><a href="13 transperency and tracker.html"><i class="fas fa-money-bill-wave"></i> Repayments</a></li>
+                <li><a href="13 transperency and tracker.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
+                <li><a href="14 help and support.html"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+            
+            <div class="sidebar-cta">
+                <a href="6 sign up.html">Add New Admin</a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1>Admin Dashboard</h1>
+                <div class="header-actions">
+                    <a href="notifications.html" class="btn btn-secondary position-relative">
+                        <i class="fas fa-bell"></i> Notifications
+                        <span class="notification-badge">5</span>
+                    </a>
+                    <a href="create-loan.html" class="btn btn-primary"><i class="fas fa-plus"></i> New Loan</a>
+                </div>
+            </div>
+            
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Total Applications</div>
+                        <div class="card-icon blue">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">142</div>
+                    <div class="card-change positive">
+                        <i class="fas fa-arrow-up"></i> 12 from last week
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill blue" style="width: 75%"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Pending Review</div>
+                        <div class="card-icon gold">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">28</div>
+                    <div class="card-change negative">
+                        <i class="fas fa-arrow-up"></i> 5 from yesterday
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill gold" style="width: 40%"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Active Loans</div>
+                        <div class="card-icon green">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">87</div>
+                    <div class="card-change positive">
+                        <i class="fas fa-arrow-up"></i> 3 from last week
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill green" style="width: 60%"></div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Overdue Payments</div>
+                        <div class="card-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                    <div class="card-value">5</div>
+                    <div class="card-change negative">
+                        <i class="fas fa-arrow-up"></i> 2 from last week
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill red" style="width: 20%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Required Section (Prominent) -->
+            <div class="action-required">
+                <div class="action-header">
+                    <h2><i class="fas fa-exclamation-circle"></i> Action Required</h2>
+                    <span class="action-badge">Urgent</span>
+                </div>
+                
+                <div class="action-items">
+                    <div class="action-item" onclick="window.location.href='admin-applications.html?filter=urgent'">
+                        <div class="action-item-header">
+                            <div class="action-item-title">Loan Applications Pending</div>
+                            <div class="action-item-count">12</div>
+                        </div>
+                        <div class="action-item-description">
+                            High-value loan applications requiring immediate review and approval
+                        </div>
+                        <div class="action-item-footer">
+                            <div class="action-item-time">Updated 2 hours ago</div>
+                            <button class="action-item-btn">Review Now</button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-item" onclick="window.location.href='admin-repayments.html?filter=overdue'">
+                        <div class="action-item-header">
+                            <div class="action-item-title">Overdue Payments</div>
+                            <div class="action-item-count">5</div>
+                        </div>
+                        <div class="action-item-description">
+                            Users with overdue payments requiring follow-up and potential payment arrangements
+                        </div>
+                        <div class="action-item-footer">
+                            <div class="action-item-time">Updated 1 day ago</div>
+                            <button class="action-item-btn">Contact Users</button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-item" onclick="window.location.href='admin-applications.html?filter=verification'">
+                        <div class="action-item-header">
+                            <div class="action-item-title">Verification Issues</div>
+                            <div class="action-item-count">8</div>
+                        </div>
+                        <div class="action-item-description">
+                            Applications with incomplete or suspicious documentation requiring verification
+                        </div>
+                        <div class="action-item-footer">
+                            <div class="action-item-time">Updated 3 days ago</div>
+                            <button class="action-item-btn">Verify</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Application Status Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2>Recent Applications</h2>
+                    <a href="admin-applications.html">View All</a>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Application ID</th>
+                                <th>Applicant</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#APP-2025-142</td>
+                                <td>Ahmed Khan</td>
+                                <td>$3,000</td>
+                                <td>Today</td>
+                                <td>Education</td>
+                                <td><span class="status-badge pending">Pending</span></td>
+                                <td>
+                                    <button onclick="reviewApplication('APP-2025-142')" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">Review</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#APP-2025-141</td>
+                                <td>Fatima Zahra</td>
+                                <td>$2,500</td>
+                                <td>Yesterday</td>
+                                <td>Home Repair</td>
+                                <td><span class="status-badge pending">Pending</span></td>
+                                <td>
+                                    <button onclick="reviewApplication('APP-2025-141')" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">Review</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#APP-2025-140</td>
+                                <td>Omar Hassan</td>
+                                <td>$5,000</td>
+                                <td>2 days ago</td>
+                                <td>Business</td>
+                                <td><span class="status-badge approved">Approved</span></td>
+                                <td>
+                                    <a href="loan-details.html?id=LN-2025-140" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">View</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>#APP-2025-139</td>
+                                <td>Aisha Ali</td>
+                                <td>$1,500</td>
+                                <td>3 days ago</td>
+                                <td>Medical</td>
+                                <td><span class="status-badge rejected">Rejected</span></td>
+                                <td>
+                                    <a href="application-details.html?id=APP-2025-139" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">View</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Application Status Chart -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Application Status</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="applicationChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Monthly Loan Disbursement Chart -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h2>Monthly Loan Disbursement</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="disbursementChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity Section -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2>Recent System Activity</h2>
+                    <a href="admin-activity.html">View All</a>
+                </div>
+                
+                <ul class="activity-list">
+                    <li class="activity-item">
+                        <div class="activity-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">System alert: 5 users with overdue payments</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon blue">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New loan application submitted by Ahmed Khan ($3,000)</div>
+                            <div class="activity-time">4 hours ago</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Loan application #APP-2025-140 approved for Omar Hassan</div>
+                            <div class="activity-time">Yesterday</div>
+                        </div>
+                    </li>
+                    <li class="activity-item">
+                        <div class="activity-icon blue">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Payment of $1,250 received from 15 different users</div>
+                            <div class="activity-time">Yesterday</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <script>
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        mobileMenuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                mobileMenuToggle.innerHTML = '<i class="fas fa-times"></i>';
+            } else {
+                mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                    mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            }
+        });
+        
+        // Function to handle application review
+        function reviewApplication(appId) {
+            // In a real application, this would navigate to the application review page
+            window.location.href = `review-application.html?id=${appId}`;
+        }
+        
+        // Initialize Application Status Chart
+        const appCtx = document.getElementById('applicationChart').getContext('2d');
+        const applicationChart = new Chart(appCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Approved', 'Rejected'],
+                datasets: [{
+                    data: [28, 87, 27],
+                    backgroundColor: [
+                        'rgba(242, 201, 76, 0.8)',
+                        'rgba(46, 196, 182, 0.8)',
+                        'rgba(231, 76, 60, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(242, 201, 76, 1)',
+                        'rgba(46, 196, 182, 1)',
+                        'rgba(231, 76, 60, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+        
+        // Initialize Monthly Loan Disbursement Chart
+        const disCtx = document.getElementById('disbursementChart').getContext('2d');
+        const disbursementChart = new Chart(disCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Loan Disbursement',
+                    data: [45000, 52000, 48000, 61000, 55000, 67000],
+                    backgroundColor: 'rgba(13, 44, 84, 0.7)',
+                    borderColor: 'rgba(13, 44, 84, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
