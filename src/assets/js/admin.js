@@ -95,6 +95,71 @@ function renderUserDetail(userId) {
     const payment = data.payment || {};
     const identity = data.identity || {};
 
+    // Get user's loans
+    const userLoans = window.db.getLoansByUserId(userId);
+    
+    // Build loan history section
+    const loanHistoryHtml = userLoans.length > 0 
+        ? userLoans.map(loan => {
+            const statusColors = {
+                pending: 'bg-amber-100 text-amber-700',
+                approved: 'bg-blue-100 text-blue-700',
+                disbursed: 'bg-green-100 text-green-700',
+                partially_paid: 'bg-cyan-100 text-cyan-700',
+                paid: 'bg-slate-100 text-slate-700',
+                rejected: 'bg-red-100 text-red-700',
+                defaulted: 'bg-red-200 text-red-800'
+            };
+            
+            // Calculate repayment progress for disbursed/partially_paid loans
+            let progressHtml = '';
+            if (loan.status === 'disbursed' || loan.status === 'partially_paid' || loan.status === 'paid') {
+                const repayments = window.db.getRepayments().filter(r => r.loanId === loan.id && r.status === 'verified');
+                const totalRepaid = repayments.reduce((sum, r) => sum + parseInt(r.amount || 0), 0);
+                const progressPercent = Math.min((totalRepaid / parseInt(loan.amount)) * 100, 100);
+                
+                progressHtml = `
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-slate-600 mb-1">
+                            <span>Repaid: ৳${totalRepaid}</span>
+                            <span>${Math.round(progressPercent)}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-primary transition cursor-pointer" onclick="renderLoanDetail('${loan.id}')">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold text-slate-900">৳${loan.amount}</p>
+                            <p class="text-sm text-slate-500">${loan.purpose || 'No purpose specified'}</p>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[loan.status] || 'bg-slate-100 text-slate-600'}">
+                            ${loan.status.replace('_', ' ').toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        Applied: ${new Date(loan.appliedAt).toLocaleDateString()}
+                    </div>
+                    ${progressHtml}
+                </div>
+            `;
+        }).join('')
+        : '<p class="text-slate-500 text-center py-6">No loan applications yet</p>';
+
+    // Calculate loan statistics
+    const loanStats = {
+        total: userLoans.length,
+        active: userLoans.filter(l => l.status === 'disbursed' || l.status === 'partially_paid').length,
+        completed: userLoans.filter(l => l.status === 'paid').length,
+        totalAmount: userLoans.filter(l => l.status === 'disbursed' || l.status === 'partially_paid' || l.status === 'paid')
+            .reduce((sum, l) => sum + parseInt(l.amount || 0), 0)
+    };
+
     // Build notes section
     const notes = user.notes || [];
     const notesHtml = notes.length > 0
@@ -408,6 +473,38 @@ function renderUserDetail(userId) {
             </div>
         </div>
 
+        <!-- User's Loan History Section -->
+        <div class="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="wallet" class="w-5 h-5 text-primary"></i>
+                    Loan History
+                </h3>
+                <div class="flex gap-4 text-sm">
+                    <div class="text-center px-3 py-1 bg-slate-100 rounded-lg">
+                        <span class="font-bold text-slate-900">${loanStats.total}</span>
+                        <span class="text-slate-600 ml-1">Total</span>
+                    </div>
+                    <div class="text-center px-3 py-1 bg-green-100 rounded-lg">
+                        <span class="font-bold text-green-700">${loanStats.active}</span>
+                        <span class="text-green-600 ml-1">Active</span>
+                    </div>
+                    <div class="text-center px-3 py-1 bg-blue-100 rounded-lg">
+                        <span class="font-bold text-blue-700">${loanStats.completed}</span>
+                        <span class="text-blue-600 ml-1">Completed</span>
+                    </div>
+                    <div class="text-center px-3 py-1 bg-amber-100 rounded-lg">
+                        <span class="font-bold text-amber-700">৳${loanStats.totalAmount}</span>
+                        <span class="text-amber-600 ml-1">Disbursed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                ${loanHistoryHtml}
+            </div>
+        </div>
+
         <!-- Reject Modal -->
         <div id="reject-user-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div id="reject-user-modal-content" class="bg-white rounded-xl shadow-xl max-w-md w-full"></div>
@@ -449,7 +546,7 @@ function renderLoanDetail(loanId) {
 
     // Build disbursement info section if exists
     let disbursementInfo = '';
-    if (loan.status === 'disbursed' && loan.disbursementInfo) {
+    if ((loan.status === 'disbursed' || loan.status === 'partially_paid') && loan.disbursementInfo) {
         disbursementInfo = `
             <div class="bg-blue-50 p-6 rounded-xl border border-blue-200 mb-6">
                 <h4 class="font-bold text-blue-900 mb-4">Disbursement Information</h4>
@@ -472,6 +569,85 @@ function renderLoanDetail(loanId) {
                 </div>
             </div>
         `;
+    }
+
+    // Build duration tracking section
+    let durationTrackingSection = '';
+    if ((loan.status === 'disbursed' || loan.status === 'partially_paid') && loan.disbursementInfo) {
+        const durationInfo = window.calculateDurationInfo ? window.calculateDurationInfo(loan) : null;
+        const scoreBadge = durationInfo && window.getScoreBadge ? window.getScoreBadge(durationInfo.score) : { bg: 'bg-slate-100', text: 'text-slate-700', label: 'N/A' };
+        
+        if (durationInfo) {
+            durationTrackingSection = `
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-xl border border-indigo-200 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-bold text-indigo-900 flex items-center gap-2">
+                            <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                            Duration Tracking
+                        </h4>
+                        <span class="px-3 py-1.5 rounded-full text-sm font-bold ${scoreBadge.bg} ${scoreBadge.text}">
+                            Score: ${durationInfo.score}/100
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-3 mb-4">
+                        <div class="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                            <p class="text-xs text-indigo-600 mb-1">Days Active</p>
+                            <p class="text-xl font-bold text-indigo-900">${durationInfo.daysSinceDisbursement || 0}</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                            <p class="text-xs text-indigo-600 mb-1">Original Due</p>
+                            <p class="text-sm font-medium text-indigo-900">${durationInfo.originalDueDate ? formatDate(durationInfo.originalDueDate) : 'N/A'}</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                            <p class="text-xs text-indigo-600 mb-1">Current Due</p>
+                            <p class="text-sm font-medium text-indigo-900">${durationInfo.currentDueDate ? formatDate(durationInfo.currentDueDate) : 'N/A'}</p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-indigo-100 text-center">
+                            <p class="text-xs text-indigo-600 mb-1">Extensions</p>
+                            <p class="text-xl font-bold ${durationInfo.totalExtensions > 0 ? 'text-amber-600' : 'text-indigo-900'}">${durationInfo.totalExtensions}/2</p>
+                        </div>
+                    </div>
+
+                    ${durationInfo.isOverdue ? `
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                            <p class="text-red-700 font-medium flex items-center gap-2">
+                                <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                This loan is ${durationInfo.daysOverdue} days overdue!
+                            </p>
+                        </div>
+                    ` : `
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                            <p class="text-green-700 font-medium flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                ${durationInfo.daysRemaining > 0 ? `${durationInfo.daysRemaining} days remaining` : 'Due today'}
+                            </p>
+                        </div>
+                    `}
+
+                    ${durationInfo.extensions && durationInfo.extensions.length > 0 ? `
+                        <div class="mt-4">
+                            <p class="text-sm font-semibold text-indigo-800 mb-2">Extension History:</p>
+                            <div class="space-y-2">
+                                ${durationInfo.extensions.map((ext, index) => `
+                                    <div class="bg-white p-3 rounded-lg border border-indigo-100 flex justify-between items-center">
+                                        <div>
+                                            <span class="text-xs font-medium text-indigo-600">Extension #${index + 1}</span>
+                                            <p class="text-sm text-slate-700">
+                                                ${formatDate(ext.previousDueDate)} → ${formatDate(ext.newDueDate)}
+                                                <span class="text-amber-600 font-medium">(+${ext.daysExtended} days)</span>
+                                            </p>
+                                            ${ext.reason ? `<p class="text-xs text-slate-500 mt-1">Reason: ${ext.reason}</p>` : ''}
+                                        </div>
+                                        <span class="text-xs text-slate-400">${formatDate(ext.extendedAt)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
     }
 
     // Build rejection info section if exists
@@ -553,34 +729,41 @@ function renderLoanDetail(loanId) {
             </div>
         `;
     } else if (loan.status === 'disbursed' || loan.status === 'partially_paid') {
+        // Get extensions info
+        const extensions = loan.extensions || [];
+        const canExtend = extensions.length < 2;
+        
         // Check if loan is overdue
         const daysUntilDue = loan.dueDate ? calculateDaysUntilDue(loan.dueDate) : null;
         const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
 
-        if (isOverdue) {
-            actionButtons = `
-                <div class="border-t border-slate-200 pt-6">
-                    <h4 class="font-bold text-slate-800 mb-4">Loan Actions</h4>
-                    
-                    ${(loan.extensionCount || 0) < 2 ? `
-                        <button onclick="extendLoanDuration('${loan.id}')" 
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 mb-3">
-                            <i data-lucide="calendar-plus" class="w-5 h-5"></i> Extend Duration
-                        </button>
-                    ` : ''}
+        actionButtons = `
+            <div class="border-t border-slate-200 pt-6">
+                <h4 class="font-bold text-slate-800 mb-4">Loan Actions</h4>
+                
+                ${canExtend ? `
+                    <button onclick="showExtendDurationModal('${loan.id}')" 
+                        class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 mb-3">
+                        <i data-lucide="calendar-plus" class="w-5 h-5"></i> Extend Duration
+                    </button>
+                ` : `
+                    <div class="w-full bg-slate-100 text-slate-500 py-3 rounded-lg font-semibold text-center mb-3">
+                        <i data-lucide="calendar-x" class="w-5 h-5 inline mr-2"></i> Max Extensions Reached (2/2)
+                    </div>
+                `}
 
+                ${isOverdue ? `
                     <button onclick="markLoanAsDefaulted('${loan.id}')" 
                         class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
                         <i data-lucide="alert-triangle" class="w-5 h-5"></i> Mark as Defaulted
                     </button>
-                    
-                    <div class="mt-3 text-center">
-                        <p class="text-sm text-slate-500">This loan is ${Math.abs(daysUntilDue)} days overdue</p>
-                        <p class="text-xs text-slate-400 mt-1">Extensions used: ${loan.extensionCount || 0}/2</p>
-                    </div>
+                ` : ''}
+                
+                <div class="mt-3 text-center">
+                    <p class="text-xs text-slate-400">Extensions used: ${extensions.length}/2</p>
                 </div>
-            `;
-        }
+            </div>
+        `;
     }
 
     adminContent.innerHTML = `
@@ -595,7 +778,12 @@ function renderLoanDetail(loanId) {
                     <div class="flex justify-between items-start mb-6">
                         <div>
                             <h2 class="text-2xl font-bold text-slate-900">Loan Request #${loan.id.slice(-4)}</h2>
-                            <p class="text-slate-500">Applied by ${loan.userName}</p>
+                            <p class="text-slate-500">
+                                Applied by 
+                                <button onclick="renderUserDetail('${loan.userId}')" class="text-primary hover:text-secondary font-semibold hover:underline transition">
+                                    ${loan.userName}
+                                </button>
+                            </p>
                             ${(() => {
             const applicant = window.db.getUsers().find(u => u.id === loan.userId);
             if (applicant && applicant.regNo) {
@@ -626,7 +814,7 @@ function renderLoanDetail(loanId) {
                         </div>
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-slate-600">Expected Repayment</span>
-                            <span class="font-medium text-slate-900">${loan.expectedDate}</span>
+                            <span class="font-medium text-slate-900">${loan.currentDueDate ? formatDate(loan.currentDueDate) : (loan.dueDate ? formatDate(loan.dueDate) : loan.expectedDate)}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-600">Duration to Pay</span>
@@ -638,14 +826,19 @@ function renderLoanDetail(loanId) {
                 if (dr === 0) return '<span class="text-green-600">On Time</span>';
                 return `<span class="text-red-600">${Math.abs(dr)} day${Math.abs(dr) !== 1 ? 's' : ''} late</span>`;
             }
-            if (loan.status !== 'disbursed' || !loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) {
+            if ((loan.status !== 'disbursed' && loan.status !== 'partially_paid') || !loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) {
                 return '<span class="text-slate-500">N/A</span>';
             }
-            const disDate = new Date(loan.disbursementInfo.disbursedAt);
+            // Use currentDueDate (after extensions) or fallback to dueDate/expectedDate
+            const currentDue = loan.currentDueDate || loan.dueDate || loan.expectedDate;
+            if (!currentDue) {
+                return '<span class="text-slate-500">N/A</span>';
+            }
+            const dueDate = new Date(currentDue);
             const today = new Date();
-            disDate.setHours(0, 0, 0, 0);
+            dueDate.setHours(0, 0, 0, 0);
             today.setHours(0, 0, 0, 0);
-            const dr = 60 - Math.floor((today - disDate) / 86400000);
+            const dr = Math.floor((dueDate - today) / 86400000);
             if (dr > 7) return `<span class="text-green-600">${dr} day${dr !== 1 ? 's' : ''} left</span>`;
             if (dr > 0) return `<span class="text-amber-600">${dr} day${dr !== 1 ? 's' : ''} left</span>`;
             if (dr === 0) return '<span class="text-amber-600">Due Today</span>';
@@ -843,6 +1036,7 @@ function renderLoanDetail(loanId) {
 
                     ${dueDateSection}
                     ${disbursementInfo}
+                    ${durationTrackingSection}
                     ${rejectionInfo}
                     ${actionButtons}
                 </div>
@@ -970,6 +1164,9 @@ function renderRepaymentVerification() {
         <tr class="border-b border-slate-100 hover:bg-slate-50">
             <td class="px-6 py-4 font-medium text-slate-900">${rep.userName || 'Unknown'}</td>
             <td class="px-6 py-4">৳${rep.amount}</td>
+            <td class="px-6 py-4 text-slate-600">
+                <div>${rep.senderAccount || 'N/A'}</div>
+            </td>
             <td class="px-6 py-4 text-slate-600">${rep.method} (${rep.trxId})</td>
             <td class="px-6 py-4">
                 ${rep.status === 'pending' ? `
@@ -1014,12 +1211,13 @@ function renderRepaymentVerification() {
                     <tr>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">User</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Amount</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Details</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Sender Account</th>
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Method & TrxID</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${rows.length > 0 ? rows : '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No repayment records found.</td></tr>'}
+                    ${rows.length > 0 ? rows : '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">No repayment records found.</td></tr>'}
                 </tbody>
             </table>
         </div>
@@ -1241,12 +1439,14 @@ function renderUserManagement() {
         const matchesSearch = (user.name.toLowerCase().includes(userFilterState.search.toLowerCase()) ||
             user.email.toLowerCase().includes(userFilterState.search.toLowerCase()));
 
-        // Updated status filter to include rejected and blocked
+        // Updated status filter to include all statuses
         let matchesStatus = true;
         if (userFilterState.status === 'verified') {
             matchesStatus = user.verificationStatus === 'verified';
         } else if (userFilterState.status === 'pending') {
             matchesStatus = user.verificationStatus === 'pending';
+        } else if (userFilterState.status === 'incomplete') {
+            matchesStatus = user.verificationStatus === 'incomplete';
         } else if (userFilterState.status === 'rejected') {
             matchesStatus = user.verificationStatus === 'rejected';
         } else if (userFilterState.status === 'blocked') {
@@ -1266,7 +1466,7 @@ function renderUserManagement() {
     });
 
     const rows = filteredUsers.map(user => `
-        < tr class="border-b border-slate-100 hover:bg-slate-50" >
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
             <td class="px-6 py-4">
                 <div class="font-medium text-slate-900">${user.name}</div>
                 <div class="text-sm text-slate-500">${user.email}</div>
@@ -1275,15 +1475,16 @@ function renderUserManagement() {
             <td class="px-6 py-4">
                 <span class="px-3 py-1 rounded-full text-xs font-medium 
                     ${(() => {
-            const status = user.verificationStatus || (user.isVerified ? 'verified' : 'unverified');
+            const status = user.verificationStatus || (user.isVerified ? 'verified' : 'incomplete');
             if (status === 'verified') return 'bg-green-100 text-green-700';
             if (status === 'pending') return 'bg-blue-100 text-blue-700';
+            if (status === 'incomplete') return 'bg-slate-100 text-slate-600';
             if (status === 'blocked') return 'bg-red-200 text-red-900';
             if (status === 'rejected') return 'bg-red-100 text-red-700';
-            return 'bg-amber-100 text-amber-700';
+            return 'bg-slate-100 text-slate-600';
         })()}">
                     ${(() => {
-            const status = user.verificationStatus || (user.isVerified ? 'verified' : 'unverified');
+            const status = user.verificationStatus || (user.isVerified ? 'verified' : 'incomplete');
             return status.charAt(0).toUpperCase() + status.slice(1);
         })()}
                 </span>
@@ -1291,11 +1492,11 @@ function renderUserManagement() {
             <td class="px-6 py-4">
                 <button onclick="renderUserDetail('${user.id}')" class="text-primary hover:text-secondary font-medium text-sm">View Details</button>
             </td>
-        </tr >
+        </tr>
         `).join('');
 
     adminContent.innerHTML = `
-        < div class="mb-6 flex flex-col md:flex-row gap-4 justify-between" >
+        <div class="mb-6 flex flex-col md:flex-row gap-4 justify-between">
             <div class="relative flex-1 max-w-md">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
                 <input type="text" placeholder="Search users..." value="${userFilterState.search}"
@@ -1306,8 +1507,9 @@ function renderUserManagement() {
                 <select onchange="userFilterState.status = this.value; renderUserManagement()" 
                     class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
                     <option value="all" ${userFilterState.status === 'all' ? 'selected' : ''}>All Status</option>
+                    <option value="incomplete" ${userFilterState.status === 'incomplete' ? 'selected' : ''}>Incomplete</option>
+                    <option value="pending" ${userFilterState.status === 'pending' ? 'selected' : ''}>Pending Review</option>
                     <option value="verified" ${userFilterState.status === 'verified' ? 'selected' : ''}>Verified</option>
-                    <option value="pending" ${userFilterState.status === 'pending' ? 'selected' : ''}>Pending</option>
                     <option value="rejected" ${userFilterState.status === 'rejected' ? 'selected' : ''}>Rejected</option>
                     <option value="blocked" ${userFilterState.status === 'blocked' ? 'selected' : ''}>Blocked</option>
                 </select>
@@ -1319,7 +1521,7 @@ function renderUserManagement() {
                     <option value="name_desc" ${userFilterState.sort === 'name_desc' ? 'selected' : ''}>Name (Z-A)</option>
                 </select>
             </div>
-        </div >
+        </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left">
@@ -1387,9 +1589,11 @@ function renderLoanManagement() {
     });
 
     const rows = filteredLoans.map(loan => `
-        < tr class="border-b border-slate-100 hover:bg-slate-50" >
+        <tr class="border-b border-slate-100 hover:bg-slate-50">
             <td class="px-6 py-4">
-                <div class="font-medium text-slate-900">${loan.userName}</div>
+                <button onclick="renderUserDetail('${loan.userId}')" class="font-medium text-primary hover:text-secondary hover:underline transition text-left">
+                    ${loan.userName}
+                </button>
                 <div class="text-sm text-slate-500">৳${loan.amount}</div>
             </td>
             <td class="px-6 py-4">
@@ -1406,8 +1610,18 @@ function renderLoanManagement() {
                 }
             }
 
-            // Calculate duration based on 60 max days - days since disbursement
-            if (loan.status !== 'disbursed' || !loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) {
+            // Defaulted loans
+            if (loan.status === 'defaulted') {
+                return '<span class="font-medium text-red-700">Defaulted</span>';
+            }
+
+            // Rejected/Pending/Approved loans - N/A
+            if (loan.status === 'rejected' || loan.status === 'pending' || loan.status === 'approved') {
+                return '<span class="text-slate-500">N/A</span>';
+            }
+
+            // Calculate duration for disbursed/partially_paid loans
+            if (!loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) {
                 return '<span class="text-slate-500">N/A</span>';
             }
 
@@ -1433,21 +1647,25 @@ function renderLoanManagement() {
             <td class="px-6 py-4 text-slate-600">${new Date(loan.appliedAt).toLocaleDateString()}</td>
             <td class="px-6 py-4">
                 <span class="px-3 py-1 rounded-full text-xs font-medium 
-                    ${loan.status === 'approved' ? 'bg-green-100 text-green-700' :
-            loan.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                loan.status === 'disbursed' ? 'bg-blue-100 text-blue-700' :
-                    'bg-red-100 text-red-700'}">
-                    ${loan.status.toUpperCase()}
+                    ${loan.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+            loan.status === 'approved' ? 'bg-blue-100 text-blue-700' :
+                loan.status === 'disbursed' ? 'bg-green-100 text-green-700' :
+                    loan.status === 'partially_paid' ? 'bg-cyan-100 text-cyan-700' :
+                        loan.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
+                            loan.status === 'rejected' ? 'bg-slate-100 text-slate-700' :
+                                loan.status === 'defaulted' ? 'bg-red-200 text-red-800' :
+                                    'bg-slate-100 text-slate-600'}">
+                    ${loan.status.replace('_', ' ').toUpperCase()}
                 </span>
             </td>
             <td class="px-6 py-4">
                 <button onclick="renderLoanDetail('${loan.id}')" class="text-primary hover:text-secondary font-medium text-sm">View Details</button>
             </td>
-        </tr >
+        </tr>
         `).join('');
 
     adminContent.innerHTML = `
-        < div class="mb-6 flex flex-col md:flex-row gap-4 justify-between" >
+        <div class="mb-6 flex flex-col md:flex-row gap-4 justify-between">
             <div class="relative flex-1 max-w-md">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
                 <input type="text" placeholder="Search by applicant name..." value="${loanFilterState.search}"
@@ -1474,7 +1692,7 @@ function renderLoanManagement() {
                     <option value="amount_low" ${loanFilterState.sort === 'amount_low' ? 'selected' : ''}>Amount (Low-High)</option>
                 </select>
             </div>
-        </div >
+        </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left">
@@ -1528,7 +1746,7 @@ function showApproveModal(loanId) {
     const modalContent = document.getElementById('modal-content');
 
     modalContent.innerHTML = `
-        < div class="p-6" >
+        <div class="p-6">
             <h3 class="text-xl font-bold text-slate-900 mb-4">Approve Loan Request</h3>
             <p class="text-slate-600 mb-6">Are you sure you want to approve this loan request? The student will be notified and the loan will be marked as approved.</p>
             <div class="flex gap-3">
@@ -1539,7 +1757,7 @@ function showApproveModal(loanId) {
                     Cancel
                 </button>
             </div>
-        </div >
+        </div>
         `;
 
     modal.classList.remove('hidden');
@@ -1550,7 +1768,7 @@ function showRejectModal(loanId) {
     const modalContent = document.getElementById('modal-content');
 
     modalContent.innerHTML = `
-        < div class="p-6" >
+        <div class="p-6">
             <h3 class="text-xl font-bold text-slate-900 mb-4">Reject Loan Request</h3>
             <p class="text-slate-600 mb-4">Please provide a reason for rejecting this loan:</p>
             
@@ -1570,7 +1788,7 @@ function showRejectModal(loanId) {
                     </button>
                 </div>
             </form>
-        </div >
+        </div>
         `;
 
     modal.classList.remove('hidden');
@@ -1815,13 +2033,13 @@ function renderVerificationManagement() {
 
     if (pendingVerifications.length === 0) {
         adminContent.innerHTML = `
-        < div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center" >
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
                 <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i data-lucide="check-circle" class="w-10 h-10 text-slate-400"></i>
                 </div>
                 <h3 class="text-xl font-bold text-slate-900 mb-2">All Caught Up!</h3>
                 <p class="text-slate-600">No pending verification requests at the moment.</p>
-            </div >
+            </div>
         `;
         lucide.createIcons();
         return;
@@ -1835,8 +2053,8 @@ function renderVerificationManagement() {
         const identity = data.identity || {};
 
         return `
-        < div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden" >
-                < !--Header -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <!-- Header -->
                 <div class="bg-gradient-to-r from-primary to-secondary p-6 text-white">
                     <div class="flex items-start justify-between">
                         <div class="flex items-center gap-4">
@@ -1855,7 +2073,7 @@ function renderVerificationManagement() {
                     </div>
                 </div>
 
-                <!--Verification Data-- >
+                <!-- Verification Data -->
         <div class="p-6 space-y-6">
             <!-- Section 1: Payment Information -->
             <div class="border-b border-slate-200 pb-6">
@@ -2052,22 +2270,22 @@ function renderVerificationManagement() {
                 </button>
             </div>
         </div>
-            </div >
+            </div>
         `;
     }).join('');
 
     adminContent.innerHTML = `
-        < div class="mb-6" >
+        <div class="mb-6">
             <p class="text-slate-600">
                 <span class="font-semibold text-primary">${pendingVerifications.length}</span>
                 student${pendingVerifications.length !== 1 ? 's' : ''} awaiting verification review
             </p>
-        </div >
+        </div>
         <div class="space-y-6">
             ${cards}
         </div>
 
-        <!--Reject Modal-- >
+        <!-- Reject Modal -->
         <div id="reject-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
             <div id="reject-modal-content" class="bg-white rounded-xl shadow-xl max-w-md w-full"></div>
         </div>
@@ -2095,7 +2313,7 @@ function showRejectVerificationModal(userId) {
     const modalContent = document.getElementById('reject-modal-content');
 
     modalContent.innerHTML = `
-        < div class="p-6" >
+        <div class="p-6">
             <h3 class="text-xl font-bold text-slate-900 mb-4">Reject Verification</h3>
             <p class="text-slate-600 mb-4">Please provide a reason for rejecting this verification request:</p>
             
@@ -2118,7 +2336,7 @@ function showRejectVerificationModal(userId) {
                     </button>
                 </div>
             </form>
-        </div >
+        </div>
         `;
 
     modal.classList.remove('hidden');
@@ -2188,7 +2406,7 @@ function showRejectUserVerificationModal(userId) {
     const modalContent = document.getElementById('reject-user-modal-content');
 
     modalContent.innerHTML = `
-        < div class="p-6" >
+        <div class="p-6">
             <h3 class="text-xl font-bold text-slate-900 mb-4">Reject Verification</h3>
             <p class="text-slate-600 mb-4">Please provide a reason for rejecting this verification request:</p>
             
@@ -2211,7 +2429,7 @@ function showRejectUserVerificationModal(userId) {
                     </button>
                 </div>
             </form>
-        </div >
+        </div>
         `;
 
     modal.classList.remove('hidden');
@@ -2278,7 +2496,7 @@ function showDisburseModal(loanId, autoApprove = false) {
     const modalContent = document.getElementById('modal-content');
 
     modalContent.innerHTML = `
-        < div class="p-6" >
+        <div class="p-6">
             <h3 class="text-2xl font-bold text-slate-900 mb-2">${autoApprove ? 'Approve & Disburse Loan' : 'Disburse Loan'}</h3>
             <p class="text-slate-600 mb-6">${autoApprove ? 'This will approve and immediately disburse the loan.' : ''} Please provide disbursement details:</p>
             
@@ -2320,7 +2538,7 @@ function showDisburseModal(loanId, autoApprove = false) {
                     </button>
                 </div>
             </form>
-        </div >
+        </div>
         `;
 
     modal.classList.remove('hidden');
@@ -2386,7 +2604,7 @@ function showBlockUserModal(userId) {
     const modalContent = document.getElementById('modal-content');
 
     modalContent.innerHTML = `
-        < div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8" >
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                     <i data-lucide="shield-ban" class="w-6 h-6 text-red-600"></i>
@@ -2416,7 +2634,7 @@ function showBlockUserModal(userId) {
                     </button>
                 </div>
             </form>
-        </div >
+        </div>
         `;
 
     modal.classList.remove('hidden');
@@ -2463,6 +2681,236 @@ function closeBlockModal() {
     document.getElementById('modal-overlay').classList.add('hidden');
 }
 
+// ==================== EXTEND DURATION MODAL ====================
+
+function showExtendDurationModal(loanId) {
+    const loan = window.db.getLoans().find(l => l.id === loanId);
+    if (!loan) {
+        alert('Loan not found!');
+        return;
+    }
+
+    // Check if already has 2 extensions
+    const extensions = loan.extensions || [];
+    if (extensions.length >= 2) {
+        alert('⚠️ Maximum 2 extensions allowed per loan. This loan has already been extended 2 times.');
+        return;
+    }
+
+    // Get current due date
+    const currentDueDate = loan.currentDueDate || loan.dueDate || loan.expectedDate;
+    const durationInfo = window.calculateDurationInfo ? window.calculateDurationInfo(loan) : { totalExtensions: extensions.length };
+
+    document.getElementById('modal-overlay').innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6">
+                <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                    <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                    Extend Loan Duration
+                </h3>
+                <p class="text-amber-100 mt-1">Loan #${loan.id.slice(-4)} - ৳${loan.amount}</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- Current Status -->
+                <div class="bg-slate-50 rounded-xl p-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-slate-500">Current Due Date</p>
+                            <p class="font-bold text-slate-900">${currentDueDate ? window.formatDate(currentDueDate) : 'Not set'}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">Extensions Used</p>
+                            <p class="font-bold ${durationInfo.totalExtensions > 0 ? 'text-amber-600' : 'text-slate-900'}">
+                                ${durationInfo.totalExtensions}/2
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                ${extensions.length > 0 ? `
+                    <div class="mb-6">
+                        <p class="text-sm font-semibold text-slate-700 mb-2">Previous Extensions:</p>
+                        <div class="space-y-2">
+                            ${extensions.map((ext, i) => `
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
+                                    <span class="font-medium text-amber-800">#${i + 1}:</span>
+                                    ${window.formatDate(ext.previousDueDate)} → ${window.formatDate(ext.newDueDate)}
+                                    <span class="text-amber-600">(+${ext.daysExtended} days)</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <form id="extendDurationForm" class="space-y-4">
+                    <input type="hidden" id="extendLoanId" value="${loanId}">
+                    <input type="hidden" id="currentDueDate" value="${currentDueDate || ''}">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Extend By (Days) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <button type="button" onclick="setExtendDays(7)" class="extend-day-btn px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 transition text-sm font-medium">
+                                7 days
+                            </button>
+                            <button type="button" onclick="setExtendDays(14)" class="extend-day-btn px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 transition text-sm font-medium">
+                                14 days
+                            </button>
+                            <button type="button" onclick="setExtendDays(21)" class="extend-day-btn px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 transition text-sm font-medium">
+                                21 days
+                            </button>
+                            <button type="button" onclick="setExtendDays(30)" class="extend-day-btn px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 transition text-sm font-medium">
+                                30 days
+                            </button>
+                        </div>
+                        <input type="number" id="extendDays" min="1" max="60" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                               placeholder="Or enter custom days (1-60)">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            New Due Date (Preview)
+                        </label>
+                        <div id="newDueDatePreview" class="px-4 py-3 bg-slate-100 rounded-xl text-slate-700 font-medium">
+                            Enter days to see new due date
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">
+                            Reason for Extension
+                        </label>
+                        <textarea id="extendReason" rows="2"
+                                  class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                  placeholder="Optional: Why is this extension needed?"></textarea>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="closeExtendModal()"
+                                class="flex-1 px-4 py-3 border border-slate-300 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:shadow-lg transition">
+                            <i data-lucide="calendar-plus" class="w-4 h-4 inline mr-2"></i>
+                            Extend Duration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modal-overlay').classList.remove('hidden');
+    lucide.createIcons();
+
+    // Add event listener for days input
+    document.getElementById('extendDays').addEventListener('input', updateNewDueDatePreview);
+
+    // Form submit
+    document.getElementById('extendDurationForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        extendLoanDuration();
+    });
+}
+
+function setExtendDays(days) {
+    document.getElementById('extendDays').value = days;
+    
+    // Update button styles
+    document.querySelectorAll('.extend-day-btn').forEach(btn => {
+        btn.classList.remove('bg-amber-500', 'text-white', 'border-amber-500');
+        btn.classList.add('border-slate-300');
+    });
+    event.target.classList.add('bg-amber-500', 'text-white', 'border-amber-500');
+    event.target.classList.remove('border-slate-300');
+    
+    updateNewDueDatePreview();
+}
+
+function updateNewDueDatePreview() {
+    const days = parseInt(document.getElementById('extendDays').value) || 0;
+    const currentDueDateStr = document.getElementById('currentDueDate').value;
+    
+    if (days > 0 && currentDueDateStr) {
+        const currentDueDate = new Date(currentDueDateStr);
+        const newDueDate = new Date(currentDueDate);
+        newDueDate.setDate(newDueDate.getDate() + days);
+        
+        document.getElementById('newDueDatePreview').innerHTML = `
+            <span class="text-green-600 font-bold">${window.formatDate(newDueDate.toISOString())}</span>
+            <span class="text-slate-500 text-sm ml-2">(+${days} days from current)</span>
+        `;
+    } else if (days > 0) {
+        const today = new Date();
+        const newDueDate = new Date(today);
+        newDueDate.setDate(newDueDate.getDate() + days);
+        
+        document.getElementById('newDueDatePreview').innerHTML = `
+            <span class="text-green-600 font-bold">${window.formatDate(newDueDate.toISOString())}</span>
+            <span class="text-slate-500 text-sm ml-2">(+${days} days from today)</span>
+        `;
+    } else {
+        document.getElementById('newDueDatePreview').textContent = 'Enter days to see new due date';
+    }
+}
+
+function extendLoanDuration() {
+    const loanId = document.getElementById('extendLoanId').value;
+    const days = parseInt(document.getElementById('extendDays').value);
+    const reason = document.getElementById('extendReason').value.trim();
+    const currentDueDateStr = document.getElementById('currentDueDate').value;
+
+    if (!days || days < 1 || days > 60) {
+        alert('Please enter a valid number of days (1-60)');
+        return;
+    }
+
+    const loan = window.db.getLoans().find(l => l.id === loanId);
+    if (!loan) {
+        alert('Loan not found!');
+        return;
+    }
+
+    // Calculate new due date
+    const previousDueDate = currentDueDateStr ? new Date(currentDueDateStr) : new Date();
+    const newDueDate = new Date(previousDueDate);
+    newDueDate.setDate(newDueDate.getDate() + days);
+
+    // Create extension record
+    const extension = {
+        previousDueDate: previousDueDate.toISOString(),
+        newDueDate: newDueDate.toISOString(),
+        daysExtended: days,
+        reason: reason || 'No reason provided',
+        extendedAt: new Date().toISOString(),
+        extendedBy: window.db.getCurrentUser()?.id || 'admin'
+    };
+
+    // Update loan
+    if (!loan.extensions) loan.extensions = [];
+    loan.extensions.push(extension);
+    loan.currentDueDate = newDueDate.toISOString();
+    
+    // Also update dueDate for backward compatibility
+    loan.dueDate = newDueDate.toISOString();
+
+    window.db.updateLoan(loan);
+
+    closeExtendModal();
+    alert(`✅ Loan duration extended by ${days} days.\nNew due date: ${window.formatDate(newDueDate.toISOString())}`);
+
+    // Refresh loan detail view
+    renderLoanDetail(loanId);
+}
+
+function closeExtendModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+}
+
 // Make functions global
 window.showDisburseModal = showDisburseModal;
 window.closeDisburseModal = closeDisburseModal;
@@ -2470,3 +2918,8 @@ window.showBlockUserModal = showBlockUserModal;
 window.blockUserAccount = blockUserAccount;
 window.unblockUserAccount = unblockUserAccount;
 window.closeBlockModal = closeBlockModal;
+window.showExtendDurationModal = showExtendDurationModal;
+window.setExtendDays = setExtendDays;
+window.updateNewDueDatePreview = updateNewDueDatePreview;
+window.extendLoanDuration = extendLoanDuration;
+window.closeExtendModal = closeExtendModal;

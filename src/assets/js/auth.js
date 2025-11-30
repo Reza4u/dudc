@@ -16,7 +16,7 @@ const auth = {
             password,
             role: 'student',
             isVerified: false,
-            verificationStatus: 'unverified',
+            verificationStatus: 'incomplete', // incomplete (no form), pending (form submitted), verified, rejected, blocked
             createdAt: new Date().toISOString()
         };
 
@@ -97,7 +97,7 @@ const auth = {
                 password: "", // No password for Google users
                 role: 'student',
                 isVerified: false,
-                verificationStatus: 'unverified',
+                verificationStatus: 'incomplete', // incomplete until verification form submitted
                 createdAt: new Date().toISOString(),
                 authProvider: 'google'
             };

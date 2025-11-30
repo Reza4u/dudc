@@ -122,26 +122,118 @@ function getActionsForStatus(status) {
     return LOAN_DETAIL_CONFIG.statusActions[status] || [];
 }
 
-// Helper: Calculate days remaining
-function calculateDaysRemaining(loan) {
-    // For completed loans with saved payment duration
+// Helper: Calculate comprehensive duration info
+function calculateDurationInfo(loan) {
+    const info = {
+        daysRemaining: null,
+        daysSinceDisbursement: null,
+        totalDuration: null,
+        originalDueDate: null,
+        currentDueDate: null,
+        extensions: loan.extensions || [],
+        totalExtensions: (loan.extensions || []).length,
+        totalDaysExtended: 0,
+        isOverdue: false,
+        daysOverdue: 0,
+        score: 100
+    };
+
+    // Calculate total days extended
+    info.extensions.forEach(ext => {
+        info.totalDaysExtended += ext.daysExtended || 0;
+    });
+
+    // For completed/paid loans with saved payment duration
     if ((loan.status === 'completed' || loan.status === 'paid') && loan.paymentDuration) {
-        return loan.paymentDuration.daysRemaining;
+        info.daysRemaining = loan.paymentDuration.daysRemaining;
+        info.paidOnTime = loan.paymentDuration.paidOnTime;
+        
+        // Calculate score for paid loans
+        if (loan.paymentDuration.daysRemaining < 0) {
+            info.daysOverdue = Math.abs(loan.paymentDuration.daysRemaining);
+        }
+        info.score = calculateLoanScore(info);
+        return info;
     }
 
-    // For active loans
-    if ((loan.status === 'disbursed' || loan.status === 'partially_paid') &&
-        loan.disbursementInfo && loan.disbursementInfo.disbursedAt) {
-        const disbursedDate = new Date(loan.disbursementInfo.disbursedAt);
-        const today = new Date();
-        disbursedDate.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-
-        const daysSinceDisbursement = Math.floor((today - disbursedDate) / (1000 * 60 * 60 * 24));
-        return 60 - daysSinceDisbursement;
+    // Get disbursement date
+    if (!loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) {
+        return info;
     }
 
-    return null;
+    const disbursedDate = new Date(loan.disbursementInfo.disbursedAt);
+    const today = new Date();
+    disbursedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    // Days since disbursement
+    info.daysSinceDisbursement = Math.floor((today - disbursedDate) / (1000 * 60 * 60 * 24));
+
+    // Original due date from loan application
+    info.originalDueDate = loan.expectedDate || null;
+
+    // Current due date (considering extensions)
+    info.currentDueDate = loan.currentDueDate || loan.dueDate || loan.expectedDate;
+
+    // Calculate days remaining from current due date
+    if (info.currentDueDate) {
+        const dueDate = new Date(info.currentDueDate);
+        dueDate.setHours(0, 0, 0, 0);
+        info.daysRemaining = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (info.daysRemaining < 0) {
+            info.isOverdue = true;
+            info.daysOverdue = Math.abs(info.daysRemaining);
+        }
+    } else {
+        // Fallback: 60 days from disbursement
+        info.daysRemaining = 60 - info.daysSinceDisbursement;
+        if (info.daysRemaining < 0) {
+            info.isOverdue = true;
+            info.daysOverdue = Math.abs(info.daysRemaining);
+        }
+    }
+
+    // For active loans, calculate score based on current status
+    info.score = calculateLoanScore(info);
+
+    return info;
+}
+
+// Helper: Calculate loan score (0-100, higher is better)
+// Score is based on whether user pays within the allowed time (including extensions)
+// Extensions don't reduce score - only paying late after extended due date does
+function calculateLoanScore(durationInfo) {
+    let score = 100;
+
+    // Only deduct points if overdue from CURRENT due date (after extensions)
+    // Extensions are allowed, so we don't penalize for using them
+    if (durationInfo.daysOverdue > 0) {
+        // Deduct 3 points per day overdue from current/extended due date (max 60 points)
+        score -= Math.min(60, durationInfo.daysOverdue * 3);
+    }
+
+    // If paid on time (within current due date), keep full score regardless of extensions
+    if (durationInfo.paidOnTime) {
+        score = 100;
+    }
+
+    return Math.max(0, Math.min(100, score));
+}
+
+// Helper: Get score badge
+function getScoreBadge(score) {
+    if (score >= 80) return { bg: 'bg-green-100', text: 'text-green-700', label: 'Excellent' };
+    if (score >= 60) return { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Good' };
+    if (score >= 40) return { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Fair' };
+    if (score >= 20) return { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Poor' };
+    return { bg: 'bg-red-100', text: 'text-red-700', label: 'Bad' };
+}
+
+// Helper: Calculate days remaining (legacy - for backward compatibility)
+function calculateDaysRemaining(loan) {
+    const info = calculateDurationInfo(loan);
+    return info.daysRemaining;
 }
 
 // Helper: Format days remaining as HTML
@@ -192,6 +284,9 @@ window.shouldShowSection = shouldShowSection;
 window.getStatusBadge = getStatusBadge;
 window.getActionsForStatus = getActionsForStatus;
 window.calculateDaysRemaining = calculateDaysRemaining;
+window.calculateDurationInfo = calculateDurationInfo;
+window.calculateLoanScore = calculateLoanScore;
+window.getScoreBadge = getScoreBadge;
 window.formatDaysRemaining = formatDaysRemaining;
 window.formatTimestamp = formatTimestamp;
 window.formatDate = formatDate;

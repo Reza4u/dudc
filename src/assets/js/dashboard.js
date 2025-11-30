@@ -3,11 +3,6 @@
  * Handles dynamic view rendering
  */
 
-/**
- * Dashboard Logic
- * Handles dynamic view rendering
- */
-
 let contentArea;
 const navItems = document.querySelectorAll('.nav-item');
 
@@ -83,6 +78,53 @@ function renderView(viewName) {
         console.warn('Lucide icons failed to load:', e);
     }
 }
+
+// Initialize Dashboard
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Dashboard: DOMContentLoaded');
+
+    // Get content area reference safely
+    contentArea = document.getElementById('content-area');
+    if (!contentArea) {
+        console.error('Dashboard: Content area not found in DOM!');
+        return;
+    }
+
+    // Check if auth is defined
+    if (!window.auth) {
+        console.error('Dashboard: Auth module not found!');
+        contentArea.innerHTML = '<div class="p-4 text-red-500">Error: Authentication module failed to load.</div>';
+        return;
+    }
+
+    // Check if user is logged in
+    let user;
+    try {
+        user = auth.checkAuth();
+    } catch (e) {
+        console.error('Dashboard: Error checking auth:', e);
+        contentArea.innerHTML = `<div class="p-4 text-red-500">Error: ${e.message}</div>`;
+        return;
+    }
+
+    console.log('Dashboard: User checked', user);
+
+    if (user) {
+        // Check if profile needs completion (for Google logins)
+        if (!user.regNo || user.regNo.trim() === '') {
+            console.log('Dashboard: Rendering profile completion');
+            renderProfileCompletion(user);
+        } else {
+            // Render default view
+            console.log('Dashboard: Rendering overview');
+            renderView('overview');
+        }
+    } else {
+        console.warn('Dashboard: No user found, should have redirected');
+    }
+});
+
+// --- All View Render Functions ---
 
 function renderSettings(user) {
     contentArea.innerHTML = `
@@ -190,7 +232,7 @@ function renderOverview(user) {
     const pendingLoan = loans.find(l => l.status === 'pending');
 
     let statusCard = '';
-    const verificationStatus = user.verificationStatus || (user.isVerified ? 'verified' : 'unverified');
+    const verificationStatus = user.verificationStatus || (user.isVerified ? 'verified' : 'incomplete');
 
     if (verificationStatus === 'verified') {
         statusCard = `
@@ -246,7 +288,21 @@ function renderOverview(user) {
                     </div>
                 </div>
             </div>`;
+    } else if (verificationStatus === 'pending') {
+        // Form submitted, waiting for admin review
+        statusCard = `
+            <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-blue-600 font-medium">Account Status</p>
+                    <h3 class="text-xl font-bold text-blue-700">Under Review</h3>
+                    <p class="text-sm text-blue-600 mt-1">Your verification is being reviewed. Usually takes 24 hours.</p>
+                </div>
+            </div>`;
     } else {
+        // 'incomplete' - registered but hasn't submitted verification form yet
         statusCard = `
             <div class="bg-amber-50 border border-amber-100 p-6 rounded-2xl flex items-center gap-4">
                 <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
@@ -254,9 +310,10 @@ function renderOverview(user) {
                 </div>
                 <div>
                     <p class="text-sm text-amber-600 font-medium">Account Status</p>
-                    <h3 class="text-xl font-bold text-amber-700">${verificationStatus === 'pending' ? 'Verification Pending' : 'Unverified'}</h3>
+                    <h3 class="text-xl font-bold text-amber-700">Verification Required</h3>
+                    <p class="text-sm text-amber-600 mt-1">Complete your verification to apply for loans.</p>
                 </div>
-                <button onclick="renderView('verification')" class="ml-auto px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition">Verify Now</button>
+                <button onclick="renderView('verification')" class="ml-auto px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition">Start Now</button>
             </div>`;
     }
 
@@ -283,15 +340,19 @@ function renderOverview(user) {
         const isPartiallyPaid = totalRepaid > 0 && remaining > 0;
 
         // Format due date and calculate status for disbursed loans
+        // Use currentDueDate (after extensions) if available, otherwise fallback to dueDate
         let dueDateDisplay = 'TBD';
         let statusIndicator = '';
 
-        if (isDisbursed && activeLoan.dueDate) {
-            const dueDate = new Date(activeLoan.dueDate);
+        const effectiveDueDate = activeLoan.currentDueDate || activeLoan.dueDate;
+        if (isDisbursed && effectiveDueDate) {
+            const dueDate = new Date(effectiveDueDate);
             dueDateDisplay = dueDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-            // Calculate days remaining
+            // Calculate days remaining from current/extended due date
             const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            dueDate.setHours(0, 0, 0, 0);
             const diffTime = dueDate - now;
             const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -314,6 +375,9 @@ function renderOverview(user) {
                         <i data-lucide="${statusColor === 'red' ? 'alert-circle' : statusColor === 'amber' ? 'clock' : 'check-circle'}" class="w-3 h-3 mr-1"></i>
                         ${statusText}
                     </span>
+                    ${activeLoan.extensions && activeLoan.extensions.length > 0 ? `
+                        <span class="text-xs text-slate-500">(Extended ${activeLoan.extensions.length}x)</span>
+                    ` : ''}
                 </div>
             `;
         }
@@ -360,16 +424,18 @@ function renderOverview(user) {
                     </div>
                     
                     <!-- Due Date Info -->
-                    ${activeLoan.dueDate ? `
+                    ${effectiveDueDate ? `
                         <div class="flex justify-between items-center p-3 bg-blue-50 border border-blue-100 rounded-lg mb-4">
                             <div>
-                                <p class="text-xs text-blue-600 font-medium">Due Date</p>
-                                <p class="text-sm font-bold text-blue-900">${new Date(activeLoan.dueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                                <p class="text-xs text-blue-600 font-medium">Due Date${activeLoan.extensions && activeLoan.extensions.length > 0 ? ' (Extended)' : ''}</p>
+                                <p class="text-sm font-bold text-blue-900">${new Date(effectiveDueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                             </div>
                             <div class="text-right">
                                 ${(() => {
-                        const dueDate = new Date(activeLoan.dueDate);
+                        const dueDate = new Date(effectiveDueDate);
                         const now = new Date();
+                        dueDate.setHours(0, 0, 0, 0);
+                        now.setHours(0, 0, 0, 0);
                         const daysRemaining = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
                         if (daysRemaining < 0) {
                             return `
@@ -416,16 +482,40 @@ function renderOverview(user) {
                     </div>
                 `}
                 
-                ${isDisbursed ? `
-                    <button onclick="event.stopPropagation(); renderView('repayment');" class="w-full py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-semibold hover:shadow-lg transition transform hover:-translate-y-0.5">
-                        ${isPartiallyPaid ? `Pay Remaining ৳${remaining}` : 'Repay Now'}
-                    </button>
-                ` : `
-                    <button disabled class="w-full py-2.5 bg-blue-100 text-blue-700 rounded-xl font-medium cursor-not-allowed">
-                        <i data-lucide="clock" class="w-4 h-4 inline mr-1"></i> Waiting for Disbursement
-                    </button>
-                    <p class="text-xs text-center text-slate-500 mt-2">Admin will confirm when money is sent.</p>
-                `}
+                ${(() => {
+                    // Check for pending repayment - show warning but still allow new repayment
+                    const pendingRepayment = window.db.getRepayments().find(r => r.loanId === activeLoan.id && r.status === 'pending');
+                    let pendingWarning = '';
+                    
+                    if (pendingRepayment) {
+                        pendingWarning = `
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="clock" class="w-4 h-4 text-amber-600 flex-shrink-0"></i>
+                                    <p class="text-sm text-amber-800">
+                                        <span class="font-semibold">৳${pendingRepayment.amount}</span> pending verification
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    if (isDisbursed) {
+                        return `
+                            ${pendingWarning}
+                            <button onclick="event.stopPropagation(); renderView('repayment');" class="w-full py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-semibold hover:shadow-lg transition transform hover:-translate-y-0.5">
+                                ${isPartiallyPaid ? `Pay Remaining ৳${remaining}` : 'Repay Now'}
+                            </button>
+                        `;
+                    } else {
+                        return `
+                            <button disabled class="w-full py-2.5 bg-blue-100 text-blue-700 rounded-xl font-medium cursor-not-allowed">
+                                <i data-lucide="clock" class="w-4 h-4 inline mr-1"></i> Waiting for Disbursement
+                            </button>
+                            <p class="text-xs text-center text-slate-500 mt-2">Admin will confirm when money is sent.</p>
+                        `;
+                    }
+                })()}
             </div>`;
     } else if (pendingLoan) {
         loanCard = `
@@ -516,11 +606,14 @@ function renderVerification(user) {
     if (user.verificationStatus === 'pending') {
         contentArea.innerHTML = `
             <div class="max-w-2xl mx-auto text-center pt-10">
-                <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-6">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-6">
                     <i data-lucide="clock" class="w-10 h-10"></i>
                 </div>
-                <h2 class="text-3xl font-bold text-slate-900 mb-2">Verification Pending</h2>
-                <p class="text-slate-600">We are reviewing your submission. This usually takes 24 hours.</p>
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Verification Under Review</h2>
+                <p class="text-slate-600 mb-4">Your verification form has been submitted successfully.</p>
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 inline-block">
+                    <p class="text-blue-700"><i data-lucide="info" class="w-4 h-4 inline mr-2"></i>Our team is reviewing your submission. This usually takes 24 hours.</p>
+                </div>
             </div>`;
         return;
     }
@@ -598,6 +691,22 @@ function renderVerification(user) {
 
 function renderLoanRequest(user) {
     console.log('🔥 renderLoanRequest called - NEW VERSION with 3 sections');
+
+    // Check if user is blocked - blocked users cannot apply for new loans
+    if (user.verificationStatus === 'blocked') {
+        contentArea.innerHTML = `
+            <div class="text-center pt-20">
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="shield-ban" class="w-10 h-10 text-red-600"></i>
+                </div>
+                <h2 class="text-xl font-bold text-red-700">Account Blocked</h2>
+                <p class="text-slate-500 mt-2 max-w-md mx-auto">Your account has been blocked. You cannot apply for new loans.</p>
+                ${user.blockReason ? `<p class="text-red-600 mt-3 bg-red-50 p-3 rounded-lg inline-block">Reason: ${user.blockReason}</p>` : ''}
+                <p class="text-slate-400 text-sm mt-4">If you have an existing loan, you can still make repayments.</p>
+            </div>`;
+        lucide.createIcons();
+        return;
+    }
 
     if (!user.isVerified) {
         contentArea.innerHTML = `
@@ -985,53 +1094,107 @@ function renderLoanRequest(user) {
     });
 }
 
+// renderRepayment with full partial payment support
 function renderRepayment(user) {
-    console.log('💳 [REPAYMENT] renderRepayment called for user:', user.id, user.name);
+    console.log('💳 [REPAYMENT v2] renderRepayment called for user:', user.id, user.name);
 
     const loans = window.db.getLoansByUserId(user.id);
-    console.log('📋 [REPAYMENT] User loans:', loans.map(l => ({ id: l.id, status: l.status, amount: l.amount })));
+    console.log('📋 [REPAYMENT v2] User loans:', loans.map(l => ({ id: l.id, status: l.status, amount: l.amount })));
 
+    // FIXED: Include 'partially_paid' status so users can pay remaining amount
     const activeLoan = loans.find(l => l.status === 'disbursed' || l.status === 'partially_paid');
 
     if (!activeLoan) {
-        console.log('❌ [REPAYMENT] No active loan found for repayment');
+        console.log('❌ [REPAYMENT v2] No active loan found for repayment');
         contentArea.innerHTML = `
             <div class="text-center pt-20">
                 <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
                 <h2 class="text-xl font-bold text-slate-700">No Active Loan to Repay</h2>
                 <p class="text-slate-500 mt-2">You don't have any disbursed loans pending repayment.</p>
             </div>`;
+        lucide.createIcons();
         return;
     }
 
-    console.log('✅ [REPAYMENT] Active loan found:', {
+    console.log('✅ [REPAYMENT v2] Active loan found:', {
         id: activeLoan.id,
         status: activeLoan.status,
         amount: activeLoan.amount
     });
 
-    // Calculate total repaid dynamically - use parseInt to ensure numbers
+    // Check for pending repayment - show warning but allow new repayment
+    const pendingRepayment = window.db.getRepayments().find(r => r.loanId === activeLoan.id && r.status === 'pending');
+    
+    // Build pending warning HTML if exists
+    let pendingWarningHTML = '';
+    if (pendingRepayment) {
+        pendingWarningHTML = `
+            <!-- Pending Repayment Warning -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-amber-900 mb-1">আপনার একটি Repayment Verification এর অপেক্ষায় আছে</h3>
+                        <p class="text-sm text-amber-700 mb-3">
+                            নিচে নতুন repayment submit করলে এটি <strong>আলাদা payment</strong> হিসেবে গণ্য হবে।
+                            একই payment দুইবার submit করবেন না।
+                        </p>
+                        <div class="bg-white rounded-lg p-3 border border-amber-200 text-sm">
+                            <div class="flex flex-wrap gap-4">
+                                <div>
+                                    <span class="text-slate-500">Amount:</span>
+                                    <span class="font-bold text-slate-900">৳${pendingRepayment.amount}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500">TrxID:</span>
+                                    <span class="font-medium text-slate-900">${pendingRepayment.trxId}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500">Date:</span>
+                                    <span class="font-medium text-slate-900">${new Date(pendingRepayment.date).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // FIXED: Calculate remaining amount dynamically from verified repayments
     const repayments = window.db.getRepayments().filter(r => r.loanId === activeLoan.id && r.status === 'verified');
     const totalRepaid = repayments.reduce((sum, r) => sum + parseInt(r.amount || 0), 0);
     const remaining = parseInt(activeLoan.amount) - totalRepaid;
     const isPartiallyPaid = totalRepaid > 0 && remaining > 0;
 
-    console.log('💰 [REPAYMENT] Payment calculation:', {
+    console.log('💰 [REPAYMENT v2] Payment calculation:', {
         loanAmount: activeLoan.amount,
         totalRepaid: totalRepaid,
         remaining: remaining,
         isPartiallyPaid: isPartiallyPaid,
-        numberOfPayments: repayments.length,
-        payments: repayments.map(r => ({ id: r.id, amount: r.amount, status: r.status }))
+        numberOfPayments: repayments.length
     });
+
+    // Use remaining amount as the due amount
+    const dueAmount = remaining;
 
     contentArea.innerHTML = `
         <div class="max-w-2xl mx-auto">
             <h2 class="text-2xl font-bold text-slate-800 mb-6">Repay Loan</h2>
             
+            ${pendingWarningHTML}
+            
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
                 ${isPartiallyPaid ? `
-                    <div class="grid grid-cols-3 gap-4 mb-6 pb-6 border-b border-slate-100">
+                    <!-- Partially Paid Status -->
+                    <div class="mb-4 inline-flex items-center px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-medium">
+                        <i data-lucide="info" class="w-4 h-4 mr-1.5"></i>
+                        Partially Paid Loan
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-slate-100">
                         <div class="text-center">
                             <p class="text-sm text-slate-500 mb-1">Total Loan</p>
                             <p class="text-xl font-bold text-slate-900">৳${activeLoan.amount}</p>
@@ -1045,733 +1208,23 @@ function renderRepayment(user) {
                             <p class="text-xl font-bold text-amber-600">৳${remaining}</p>
                         </div>
                     </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-600 font-medium">Repayment Progress</span>
+                            <span class="text-xs text-slate-600 font-bold">${Math.round((totalRepaid / activeLoan.amount) * 100)}%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2.5">
+                            <div class="bg-gradient-to-r from-green-500 to-green-600 h-2.5 rounded-full transition-all duration-500" style="width: ${(totalRepaid / activeLoan.amount) * 100}%"></div>
+                        </div>
+                    </div>
                 ` : `
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-slate-500">Total Due</span>
-                        <span class="text-2xl font-bold text-slate-900">৳${activeLoan.amount}</span>
+                        <span class="text-slate-500">Total Due Amount</span>
+                        <span class="text-2xl font-bold text-slate-900">৳${dueAmount}</span>
                     </div>
                 `}
-                <div class="p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
-                    Send money to <strong>01671-XXXXXX</strong> (Bkash/Nagad Personal)
-                </div>
-            </div>
-
-            <form id="repayForm" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Amount Paid</label>
-                    <input type="number" id="repayAmount" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" value="${remaining}" placeholder="e.g. ${remaining}">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
-                    <select class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                        <option>Bkash</option>
-                        <option>Nagad</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Transaction ID (TrxID)</label>
-                    <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                </div>
-
-                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">Submit Repayment Info</button>
-            </form>
-        </div>
-    `;
-
-    document.getElementById('repayForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const amount = document.getElementById('repayAmount').value;
-        const method = document.querySelector('#repayForm select').value;
-        const trxId = document.querySelector('#repayForm input[type="text"]').value;
-
-        const newRepayment = {
-            id: 'rep-' + Date.now(),
-            userId: user.id,
-            userName: user.name,
-            loanId: activeLoan.id,
-            amount: parseInt(amount),
-            method,
-            trxId,
-            status: 'pending',
-            date: new Date().toISOString()
-        };
-
-        window.db.addRepayment(newRepayment);
-        alert('Repayment info submitted! Please wait for Admin verification.');
-        renderView('overview');
-    });
-}
-
-function renderHistory(user) {
-    const loans = window.db.getLoansByUserId(user.id);
-
-    if (loans.length === 0) {
-        contentArea.innerHTML = `
-            <div class="text-center pt-20">
-                <p class="text-slate-500">No history found.</p>
-            </div>`;
-        return;
-    }
-
-    const rows = loans.map(loan => `
-        <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-            <td class="px-6 py-4 text-sm text-slate-900 font-medium">৳${loan.amount}</td>
-            <td class="px-6 py-4 text-sm text-slate-600">${new Date(loan.appliedAt).toLocaleDateString()}</td>
-            <td class="px-6 py-4 text-sm text-slate-600">${loan.reason}</td>
-            <td class="px-6 py-4">
-                <span class="px-3 py-1 rounded-full text-xs font-medium 
-                    ${loan.status === 'approved' ? 'bg-green-100 text-green-700' :
-            loan.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                loan.status === 'disbursed' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}">
-                    ${loan.status.toUpperCase()}
-                </span>
-            </td>
-        </tr>
-    `).join('');
-
-    contentArea.innerHTML = `
-        <h2 class="text-2xl font-bold text-slate-800 mb-6">Loan History</h2>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Amount</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Date</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Reason</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-// Initialize Dashboard
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Dashboard: DOMContentLoaded');
-
-    // Get content area reference safely
-    contentArea = document.getElementById('content-area');
-    if (!contentArea) {
-        console.error('Dashboard: Content area not found in DOM!');
-        return;
-    }
-
-    // Check if auth is defined
-    if (!window.auth) {
-        console.error('Dashboard: Auth module not found!');
-        contentArea.innerHTML = '<div class="p-4 text-red-500">Error: Authentication module failed to load.</div>';
-        return;
-    }
-
-    // Check if user is logged in
-    let user;
-    try {
-        user = auth.checkAuth();
-    } catch (e) {
-        console.error('Dashboard: Error checking auth:', e);
-        contentArea.innerHTML = `<div class="p-4 text-red-500">Error: ${e.message}</div>`;
-        return;
-    }
-
-    console.log('Dashboard: User checked', user);
-
-    if (user) {
-        // Check if profile needs completion (for Google logins)
-        if (!user.regNo || user.regNo.trim() === '') {
-            console.log('Dashboard: Rendering profile completion');
-            renderProfileCompletion(user);
-        } else {
-            // Render default view
-            console.log('Dashboard: Rendering overview');
-            renderView('overview');
-        }
-    } else {
-        console.warn('Dashboard: No user found, should have redirected');
-    }
-});
-
-function renderSettings(user) {
-    contentArea.innerHTML = `
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Profile Settings</h2>
-            
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-2xl font-bold">
-                        ${user.name.charAt(0)}
-                    </div>
-                    <div>
-                        <button class="text-primary font-medium hover:underline">Change Photo</button>
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                        <input type="text" value="${user.name}" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                        <input type="email" value="${user.email}" disabled class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                        <input type="text" value="${user.phone || ''}" placeholder="Add phone number" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Registration No</label>
-                        <input type="text" value="${user.regNo || ''}" disabled class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 outline-none">
-                    </div>
-                </div>
-
-                <div class="pt-4 border-t border-slate-100">
-                    <h3 class="font-bold text-slate-800 mb-4">Security</h3>
-                    <button class="text-primary font-medium hover:underline">Change Password</button>
-                </div>
-
-                <div class="pt-4">
-                    <button class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">Save Changes</button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function renderProfileCompletion(user) {
-    // Hide sidebar for this view
-    document.querySelector('aside').classList.add('hidden');
-    document.querySelector('header').classList.add('hidden');
-
-    contentArea.innerHTML = `
-        <div class="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-            <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-6">
-                    <i data-lucide="user-plus" class="w-8 h-8"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-slate-900 mb-2">One Last Step!</h2>
-                <p class="text-slate-600 mb-6">Please provide your Dhaka University Registration Number to complete your profile.</p>
-                
-                <form id="completionForm" class="text-left">
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Registration No.</label>
-                        <input type="text" id="completeRegNo" required
-                            class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
-                            placeholder="2020XXXXXX">
-                    </div>
-                    <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">
-                        Complete Profile
-                    </button>
-                </form>
-            </div>
-        </div>
-    `;
-    lucide.createIcons();
-
-    document.getElementById('completionForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const regNo = document.getElementById('completeRegNo').value;
-
-        // Update user
-        user.regNo = regNo;
-        window.db.updateUser(user);
-
-        // Reload to show dashboard
-        window.location.reload();
-    });
-}
-
-// --- Views ---
-
-function renderOverview(user) {
-    const loans = window.db.getLoansByUserId(user.id);
-    const activeLoan = loans.find(l => l.status === 'approved' || l.status === 'disbursed');
-    const pendingLoan = loans.find(l => l.status === 'pending');
-
-    let statusCard = '';
-    if (user.isVerified) {
-        statusCard = `
-            <div class="bg-green-50 border border-green-100 p-6 rounded-2xl flex items-center gap-4">
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                    <i data-lucide="check-circle" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-green-600 font-medium">Account Status</p>
-                    <h3 class="text-xl font-bold text-green-700">Verified</h3>
-                </div>
-            </div>`;
-    } else {
-        statusCard = `
-            <div class="bg-amber-50 border border-amber-100 p-6 rounded-2xl flex items-center gap-4">
-                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
-                    <i data-lucide="alert-circle" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-amber-600 font-medium">Account Status</p>
-                    <h3 class="text-xl font-bold text-amber-700">${user.verificationStatus === 'pending' ? 'Verification Pending' : 'Unverified'}</h3>
-                </div>
-                <button onclick="renderView('verification')" class="ml-auto px-4 py-2 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition">Verify Now</button>
-            </div>`;
-    }
-
-    let loanCard = '';
-    if (activeLoan) {
-        const isDisbursed = activeLoan.status === 'disbursed' || activeLoan.status === 'partially_paid';
-
-        loanCard = `
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-lg font-bold text-slate-800 mb-4">Active Loan</h3>
-                <div class="flex justify-between items-end mb-2">
-                    <div>
-                        <p class="text-sm text-slate-500">Amount Due</p>
-                        <p class="text-3xl font-bold text-slate-900">৳${activeLoan.amount}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm text-slate-500">Due Date</p>
-                        <p class="text-lg font-medium text-primary">${activeLoan.dueDate ? activeLoan.dueDate.split('T')[0] : 'TBD'}</p>
-                    </div>
-                </div>
-                <div class="w-full bg-slate-100 rounded-full h-2.5 mb-4">
-                    <div class="bg-primary h-2.5 rounded-full" style="width: ${activeLoan.repaid ? (activeLoan.repaid / activeLoan.amount) * 100 : 0}%"></div>
-                </div>
-                
-                ${isDisbursed ? `
-                    <button onclick="renderView('repayment')" class="w-full py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-secondary transition">Repay Now</button>
-                ` : `
-                    <button disabled class="w-full py-2.5 bg-blue-100 text-blue-700 rounded-xl font-medium cursor-not-allowed">
-                        <i data-lucide="clock" class="w-4 h-4 inline mr-1"></i> Waiting for Disbursement
-                    </button>
-                    <p class="text-xs text-center text-slate-500 mt-2">Admin will confirm when money is sent.</p>
-                `}
-            </div>`;
-    } else if (pendingLoan) {
-        loanCard = `
-            <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl text-center">
-                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-3">
-                    <i data-lucide="clock" class="w-6 h-6"></i>
-                </div>
-                <h3 class="text-lg font-bold text-blue-900">Application Pending</h3>
-                <p class="text-blue-600 mt-1">Your loan request for ৳${pendingLoan.amount} is being reviewed.</p>
-            </div>`;
-    } else {
-        loanCard = `
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center flex flex-col items-center justify-center h-full">
-                <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-3">
-                    <i data-lucide="hand-coins" class="w-6 h-6"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800">No Active Loan</h3>
-                <p class="text-slate-500 mt-1 mb-4">Need financial support?</p>
-                <button onclick="renderView('loan-request')" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 transition" ${!user.isVerified ? 'disabled title="Verify account first"' : ''}>Apply for Loan</button>
-            </div>`;
-    }
-
-    contentArea.innerHTML = `
-        <h2 class="text-2xl font-bold text-slate-800 mb-6">Welcome, ${user.name.split(' ')[0]} 👋</h2>
-        <div class="grid md:grid-cols-2 gap-6 mb-8">
-            ${statusCard}
-            ${loanCard}
-        </div>
-    `;
-}
-
-function renderVerification(user) {
-    if (user.isVerified) {
-        contentArea.innerHTML = `
-            <div class="max-w-2xl mx-auto text-center pt-10">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-6">
-                    <i data-lucide="shield-check" class="w-10 h-10"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-slate-900 mb-2">You are Verified!</h2>
-                <p class="text-slate-600">Your account is fully verified. You can now apply for loans.</p>
-            </div>`;
-        return;
-    }
-
-    if (user.verificationStatus === 'pending') {
-        contentArea.innerHTML = `
-            <div class="max-w-2xl mx-auto text-center pt-10">
-                <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-6">
-                    <i data-lucide="clock" class="w-10 h-10"></i>
-                </div>
-                <h2 class="text-3xl font-bold text-slate-900 mb-2">Verification Pending</h2>
-                <p class="text-slate-600">We are reviewing your submission. This usually takes 24 hours.</p>
-            </div>`;
-        return;
-    }
-
-    contentArea.innerHTML = `
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Complete Profile & Verify</h2>
-            
-            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 mb-6">
-                <h3 class="font-bold text-lg mb-4">Step 1: Pay Verification Fee</h3>
-                <p class="text-slate-600 mb-4">Please send <span class="font-bold text-slate-900">100 BDT</span> (Non-refundable) to one of the numbers below.</p>
-                <div class="flex gap-4 mb-6">
-                    <div class="bg-pink-50 text-pink-700 px-4 py-2 rounded-lg font-medium">Bkash: 01671-XXXXXX</div>
-                    <div class="bg-orange-50 text-orange-700 px-4 py-2 rounded-lg font-medium">Nagad: 01671-XXXXXX</div>
-                </div>
-            </div>
-
-            <form id="verificationForm" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                <h3 class="font-bold text-lg">Step 2: Submit Details</h3>
-                
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Father's Name</label>
-                        <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Mother's Name</label>
-                        <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
-                        <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Session</label>
-                        <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. 2019-20">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Transaction ID (TrxID)</label>
-                    <input type="text" id="verifyTrxId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="Enter the TrxID of 100 BDT payment">
-                </div>
-
-                <!-- Image Uploads -->
-                <div class="grid md:grid-cols-3 gap-6 pt-4 border-t border-slate-200">
-                    <!-- ID Card Front -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">University ID Card (Front) <span class="text-red-500">*</span></label>
-                        <input type="file" id="idCardFront" accept="image/*" required class="hidden" onchange="previewImage(this, 'preview-front')">
-                        <div class="relative" id="preview-front" onclick="document.getElementById('idCardFront').click()" style="cursor: pointer;">
-                            <div class="w-full h-40 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center hover:bg-slate-200 transition">
-                                <i data-lucide="upload" class="w-8 h-8 text-slate-400 mb-2"></i>
-                                <span class="text-xs text-slate-500">Click to upload</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ID Card Back -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">University ID Card (Back) <span class="text-red-500">*</span></label>
-                        <input type="file" id="idCardBack" accept="image/*" required class="hidden" onchange="previewImage(this, 'preview-back')">
-                        <div class="relative" id="preview-back" onclick="document.getElementById('idCardBack').click()" style="cursor: pointer;">
-                            <div class="w-full h-40 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center hover:bg-slate-200 transition">
-                                <i data-lucide="upload" class="w-8 h-8 text-slate-400 mb-2"></i>
-                                <span class="text-xs text-slate-500">Click to upload</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Photo -->
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Your Recent Photo <span class="text-red-500">*</span></label>
-                        <input type="file" id="recentPhoto" accept="image/*" required class="hidden" onchange="previewImage(this, 'preview-photo')">
-                        <div class="relative" id="preview-photo" onclick="document.getElementById('recentPhoto').click()" style="cursor: pointer;">
-                            <div class="w-full h-40 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center hover:bg-slate-200 transition">
-                                <i data-lucide="upload" class="w-8 h-8 text-slate-400 mb-2"></i>
-                                <span class="text-xs text-slate-500">Click to upload</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">Submit for Verification</button>
-                </div>
-            </form>
-        </div>
-    `;
-
-    // Image preview function
-    window.previewImage = function (input, previewId) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const previewDiv = document.getElementById(previewId);
-                previewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-40 object-cover rounded-lg" onclick="document.getElementById('${input.id}').click()">`;
-                // Store base64 in  the input's data attribute for later use
-                input.dataset.base64 = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    };
-
-    document.getElementById('verificationForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        // Get image data
-        const idCardFront = document.getElementById('idCardFront');
-        const idCardBack = document.getElementById('idCardBack');
-        const recentPhoto = document.getElementById('recentPhoto');
-
-        // Update user with verification data
-        user.verificationStatus = 'pending';
-        user.verificationData = {
-            payment: {
-                senderNumber: user.phone || '01700000000',
-                transactionId: document.getElementById('verifyTrxId').value
-            },
-            personal: {
-                fatherName: document.querySelector('input[type="text"]').value || '',
-                motherName: document.querySelectorAll('input[type="text"]')[1].value || '',
-                userMobile: user.phone || '',
-                gender: 'Not Provided',
-                dob: '2000-01-01',
-                currentAddress: 'Dhaka University',
-                permanentAddress: 'N/A'
-            },
-            academic: {
-                regNo: user.regNo,
-                department: document.querySelectorAll('input[type="text"]')[2].value || '',
-                session: document.querySelectorAll('input[type="text"]')[3].value || '',
-                program: 'B.Sc',
-                hall: 'N/A'
-            },
-            identity: {
-                method: 'document',
-                idCardFrontUrl: idCardFront.dataset.base64 || '',
-                idCardBackUrl: idCardBack.dataset.base64 || '',
-                recentPhotoUrl: recentPhoto.dataset.base64 || ''
-            },
-            submittedAt: new Date().toISOString()
-        };
-
-        window.db.updateUser(user);
-        alert('Verification submitted successfully!');
-        renderView('overview');
-    });
-}
-
-
-
-function renderRepayment(user) {
-    const loans = window.db.getLoansByUserId(user.id);
-    const activeLoan = loans.find(l => l.status === 'disbursed');
-
-    if (!activeLoan) {
-        contentArea.innerHTML = `
-            <div class="text-center pt-20">
-                <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
-                <h2 class="text-xl font-bold text-slate-700">No Active Loan to Repay</h2>
-                <p class="text-slate-500 mt-2">You don't have any disbursed loans pending repayment.</p>
-            </div>`;
-        return;
-    }
-
-    contentArea.innerHTML = `
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Repay Loan</h2>
-            
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-slate-500">Total Due</span>
-                    <span class="text-2xl font-bold text-slate-900">৳${activeLoan.amount}</span>
-                </div>
-                <div class="p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
-                    Send money to <strong>01671-XXXXXX</strong> (Bkash/Nagad Personal)
-                </div>
-            </div>
-
-            <form id="repayForm" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Amount Paid</label>
-                    <input type="number" id="repayAmount" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. ${activeLoan.amount}">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
-                    <select class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                        <option>Bkash</option>
-                        <option>Nagad</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Transaction ID (TrxID)</label>
-                    <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                </div>
-
-                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">Submit Repayment Info</button>
-            </form>
-        </div>
-    `;
-
-    document.getElementById('repayForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const amount = document.getElementById('repayAmount').value;
-        const method = document.querySelector('#repayForm select').value;
-        const trxId = document.querySelector('#repayForm input[type="text"]').value;
-
-        const newRepayment = {
-            id: 'rep-' + Date.now(),
-            userId: user.id,
-            userName: user.name,
-            loanId: activeLoan.id,
-            amount: parseInt(amount),
-            method,
-            trxId,
-            status: 'pending',
-            date: new Date().toISOString()
-        };
-
-        window.db.addRepayment(newRepayment);
-        alert('Repayment info submitted! Please wait for Admin verification.');
-        renderView('overview');
-    });
-}
-
-function renderHistory(user) {
-    const loans = window.db.getLoansByUserId(user.id);
-
-    if (loans.length === 0) {
-        contentArea.innerHTML = `
-            <div class="text-center pt-20">
-                <p class="text-slate-500">No history found.</p>
-            </div>`;
-        return;
-    }
-
-    const rows = loans.map(loan => `
-        <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-            <td class="px-6 py-4 text-sm text-slate-900 font-medium">৳${loan.amount}</td>
-            <td class="px-6 py-4 text-sm text-slate-600">${new Date(loan.appliedAt).toLocaleDateString()}</td>
-            <td class="px-6 py-4 text-sm text-slate-600">${loan.reason}</td>
-            <td class="px-6 py-4">
-                <span class="px-3 py-1 rounded-full text-xs font-medium 
-                    ${loan.status === 'approved' ? 'bg-green-100 text-green-700' :
-            loan.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                loan.status === 'disbursed' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}">
-                    ${loan.status.toUpperCase()}
-                </span>
-            </td>
-        </tr>
-    `).join('');
-
-    contentArea.innerHTML = `
-        <h2 class="text-2xl font-bold text-slate-800 mb-6">Loan History</h2>
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50 border-b border-slate-100">
-                    <tr>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Amount</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Date</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Reason</th>
-                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
-        </div>
-            
-            <form id="loanForm" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                <div class="bg-blue-50 p-4 rounded-lg text-sm text-blue-800 mb-6">
-                    <p class="font-bold mb-1">Important:</p>
-                    <ul class="list-disc list-inside space-y-1">
-                        <li>Maximum loan amount: 3000 BDT</li>
-                        <li>Repayment period: Max 60 days</li>
-                        <li>Two witnesses required</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Amount Needed (BDT)</label>
-                    <input type="number" id="loanAmount" min="500" max="3000" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="500 - 3000">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Reason for Loan</label>
-                    <textarea id="loanReason" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" rows="3"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Expected Repayment Date</label>
-                    <input type="date" id="loanDate" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Receive Money Via</label>
-                    <select class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
-                        <option>Bkash</option>
-                        <option>Nagad</option>
-                        <option>Rocket</option>
-                    </select>
-                </div>
-
-                <div class="border-t border-slate-100 pt-4">
-                    <h4 class="font-bold text-slate-800 mb-4">Witness Information</h4>
-                    <div class="space-y-4">
-                        <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none" placeholder="Witness Name">
-                        <input type="text" required class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none" placeholder="Witness Phone">
-                        <label class="flex items-center gap-2 text-sm text-slate-600">
-                            <input type="checkbox" required class="text-primary focus:ring-primary">
-                            I promise to repay this loan within the stipulated time.
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">Submit Application</button>
-            </form>
-        </div>
-    `;
-
-    document.getElementById('loanForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const amount = document.getElementById('loanAmount').value;
-        const reason = document.getElementById('loanReason').value;
-        const date = document.getElementById('loanDate').value;
-
-        const newLoan = {
-            id: 'loan-' + Date.now(),
-            userId: user.id,
-            userName: user.name,
-            amount: parseInt(amount),
-            reason,
-            expectedDate: date,
-            status: 'pending', // pending, approved, disbursed, paid
-            appliedAt: new Date().toISOString()
-        };
-
-        window.db.addLoan(newLoan);
-        alert('Loan application submitted!');
-        renderView('overview');
-    });
-}
-
-function renderRepayment(user) {
-    const loans = window.db.getLoansByUserId(user.id);
-    const activeLoan = loans.find(l => l.status === 'disbursed');
-
-    if (!activeLoan) {
-        contentArea.innerHTML = `
-            <div class="text-center pt-20">
-                <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-4"></i>
-                <h2 class="text-xl font-bold text-slate-700">No Active Loan to Repay</h2>
-                <p class="text-slate-500 mt-2">You don't have any disbursed loans pending repayment.</p>
-            </div>`;
-        return;
-    }
-
-    const dueAmount = activeLoan.amount;
-
-    contentArea.innerHTML = `
-        <div class="max-w-2xl mx-auto">
-            <h2 class="text-2xl font-bold text-slate-800 mb-6">Repay Loan</h2>
-            
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-slate-500">Total Due Amount</span>
-                    <span class="text-2xl font-bold text-slate-900">৳${dueAmount}</span>
-                </div>
                 <div class="p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
                     Send money to <strong>01671-XXXXXX</strong> (Bkash/Nagad Personal)
                 </div>
@@ -1786,10 +1239,10 @@ function renderRepayment(user) {
                             <input type="radio" name="paymentType" value="full" checked class="peer sr-only">
                             <div class="p-4 border-2 border-slate-300 rounded-lg peer-checked:border-primary peer-checked:bg-primary/5 transition">
                                 <div class="flex items-center justify-between mb-2">
-                                    <span class="font-semibold text-slate-900">Full Payment</span>
+                                    <span class="font-semibold text-slate-900">${isPartiallyPaid ? 'Pay Remaining' : 'Full Payment'}</span>
                                     <i data-lucide="check-circle" class="w-5 h-5 text-primary hidden peer-checked:block"></i>
                                 </div>
-                                <p class="text-sm text-slate-600">Pay entire amount</p>
+                                <p class="text-sm text-slate-600">${isPartiallyPaid ? 'Clear remaining balance' : 'Pay entire amount'}</p>
                                 <p class="text-lg font-bold text-primary mt-2">৳${dueAmount}</p>
                             </div>
                         </label>
@@ -1820,7 +1273,7 @@ function renderRepayment(user) {
                             class="w-full pl-8 pr-3 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none font-semibold text-lg" 
                             placeholder="Enter amount">
                     </div>
-                    <p id="amountHint" class="text-sm text-slate-500 mt-2">Paying full amount: ৳${dueAmount}</p>
+                    <p id="amountHint" class="text-sm text-slate-500 mt-2">${isPartiallyPaid ? `Paying remaining balance: ৳${dueAmount}` : `Paying full amount: ৳${dueAmount}`}</p>
                     <p id="amountError" class="text-sm text-red-600 mt-2 hidden"></p>
                 </div>
 
@@ -1842,7 +1295,9 @@ function renderRepayment(user) {
                     <input type="text" id="trxId" required class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" placeholder="e.g. 9A2B3C4D5E">
                 </div>
 
-                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">Submit Repayment Info</button>
+                <button type="submit" class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold shadow-md transition">
+                    ${isPartiallyPaid ? `Pay Remaining ৳${dueAmount}` : 'Submit Repayment Info'}
+                </button>
             </form>
         </div>
     `;
@@ -1859,7 +1314,7 @@ function renderRepayment(user) {
                 amountInput.value = dueAmount;
                 amountInput.readOnly = true;
                 amountInput.classList.add('bg-slate-50');
-                amountHint.textContent = `Paying full amount: ৳${dueAmount}`;
+                amountHint.textContent = isPartiallyPaid ? `Paying remaining balance: ৳${dueAmount}` : `Paying full amount: ৳${dueAmount}`;
                 amountError.classList.add('hidden');
             } else {
                 amountInput.value = '';
@@ -1923,8 +1378,9 @@ function renderRepayment(user) {
         };
 
         window.db.addRepayment(newRepayment);
-        alert(`Repayment info submitted! Amount: ৳${amount} (${paymentType === 'full' ? 'Full Payment' : 'Partial Payment'})\nPlease wait for Admin verification.`);
-        renderView('overview');
+        
+        // Refresh repayment view to show pending status
+        renderView('repayment');
     });
 
     lucide.createIcons();
@@ -2356,32 +1812,3 @@ function renderHistory(user) {
 
     lucide.createIcons();
 }
-
-// Initialize Dashboard
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Dashboard: DOMContentLoaded');
-
-    // Check if auth is defined
-    if (!window.auth) {
-        console.error('Dashboard: Auth module not found!');
-        return;
-    }
-
-    // Check if user is logged in
-    const user = auth.checkAuth();
-    console.log('Dashboard: User checked', user);
-
-    if (user) {
-        // Check if profile needs completion (for Google logins)
-        if (!user.regNo || user.regNo.trim() === '') {
-            console.log('Dashboard: Rendering profile completion');
-            renderProfileCompletion(user);
-        } else {
-            // Render default view
-            console.log('Dashboard: Rendering overview');
-            renderView('overview');
-        }
-    } else {
-        console.warn('Dashboard: No user found, should have redirected');
-    }
-});

@@ -6,7 +6,9 @@
 // Main unified loan detail renderer
 function renderUnifiedLoanDetail(loan, userId, role) {
     const badge = getStatusBadge(loan.status);
-    const daysRemaining = calculateDaysRemaining(loan);
+    const durationInfo = calculateDurationInfo(loan);
+    const daysRemaining = durationInfo.daysRemaining;
+    const scoreBadge = getScoreBadge(durationInfo.score);
 
     // Get user's loan history (last 5 loans)
     const allUserLoans = window.db.getLoans().filter(l => l.userId === userId && l.id !== loan.id);
@@ -31,9 +33,16 @@ function renderUnifiedLoanDetail(loan, userId, role) {
                         <h2 class="text-2xl font-bold text-slate-900">Loan Request #${loan.id.slice(-4)}</h2>
                         <p class="text-slate-500 mt-1">Applied on ${formatDate(loan.appliedAt)}</p>
                     </div>
-                    <span class="px-4 py-2 rounded-full text-sm font-medium ${badge.bg} ${badge.text}">
-                        ${badge.label}
-                    </span>
+                    <div class="flex items-center gap-3">
+                        ${(loan.status === 'disbursed' || loan.status === 'partially_paid' || loan.status === 'paid') ? `
+                            <span class="px-3 py-1.5 rounded-full text-xs font-medium ${scoreBadge.bg} ${scoreBadge.text}">
+                                Score: ${durationInfo.score}
+                            </span>
+                        ` : ''}
+                        <span class="px-4 py-2 rounded-full text-sm font-medium ${badge.bg} ${badge.text}">
+                            ${badge.label}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Amount Info -->
@@ -45,7 +54,7 @@ function renderUnifiedLoanDetail(loan, userId, role) {
                         </div>
                         <div>
                             <p class="text-sm text-slate-600 mb-1">Expected Repayment</p>
-                            <p class="text-xl font-medium text-primary">${loan.dueDate ? formatDate(loan.dueDate) : 'TBD'}</p>
+                            <p class="text-xl font-medium text-primary">${durationInfo.currentDueDate ? formatDate(durationInfo.currentDueDate) : (loan.dueDate ? formatDate(loan.dueDate) : 'TBD')}</p>
                         </div>
                         <div>
                             <p class="text-sm text-slate-600 mb-1">Duration</p>
@@ -53,7 +62,74 @@ function renderUnifiedLoanDetail(loan, userId, role) {
                         </div>
                     </div>
                 </div>
+    `;
 
+    // Duration Details Section (for disbursed/partially_paid loans)
+    if ((loan.status === 'disbursed' || loan.status === 'partially_paid') && loan.disbursementInfo) {
+        html += `
+            <div class="bg-blue-50 p-6 rounded-xl border border-blue-200 mb-6">
+                <h4 class="font-bold text-blue-900 mb-4 flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    Duration Tracking
+                </h4>
+                
+                <div class="grid md:grid-cols-4 gap-4 mb-4">
+                    <div class="bg-white p-3 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-600 mb-1">Days Since Disbursement</p>
+                        <p class="text-lg font-bold text-blue-900">${durationInfo.daysSinceDisbursement} days</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-600 mb-1">Original Due Date</p>
+                        <p class="text-sm font-medium text-blue-900">${durationInfo.originalDueDate ? formatDate(durationInfo.originalDueDate) : 'N/A'}</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-600 mb-1">Current Due Date</p>
+                        <p class="text-sm font-medium text-blue-900">${durationInfo.currentDueDate ? formatDate(durationInfo.currentDueDate) : 'N/A'}</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-blue-100">
+                        <p class="text-xs text-blue-600 mb-1">Extensions</p>
+                        <p class="text-lg font-bold ${durationInfo.totalExtensions > 0 ? 'text-amber-600' : 'text-blue-900'}">
+                            ${durationInfo.totalExtensions}/2
+                            ${durationInfo.totalDaysExtended > 0 ? `<span class="text-xs font-normal">(+${durationInfo.totalDaysExtended} days)</span>` : ''}
+                        </p>
+                    </div>
+                </div>
+
+                ${durationInfo.isOverdue ? `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                        <p class="text-red-700 font-medium flex items-center gap-2">
+                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                            This loan is ${durationInfo.daysOverdue} days overdue!
+                        </p>
+                    </div>
+                ` : ''}
+
+                ${durationInfo.extensions.length > 0 ? `
+                    <div class="mt-4">
+                        <p class="text-sm font-semibold text-blue-800 mb-2">Extension History:</p>
+                        <div class="space-y-2">
+                            ${durationInfo.extensions.map((ext, index) => `
+                                <div class="bg-white p-3 rounded-lg border border-blue-100 flex justify-between items-center">
+                                    <div>
+                                        <span class="text-xs font-medium text-blue-600">Extension #${index + 1}</span>
+                                        <p class="text-sm text-slate-700">
+                                            ${formatDate(ext.previousDueDate)} → ${formatDate(ext.newDueDate)}
+                                            <span class="text-amber-600 font-medium">(+${ext.daysExtended} days)</span>
+                                        </p>
+                                        ${ext.reason ? `<p class="text-xs text-slate-500 mt-1">Reason: ${ext.reason}</p>` : ''}
+                                    </div>
+                                    <span class="text-xs text-slate-400">${formatDate(ext.extendedAt)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    // Purpose Section
+    html += `
                 <!-- Purpose -->
                 <div class="mb-6">
                     <h4 class="font-bold text-slate-900 mb-3">Purpose of Loan</h4>
@@ -61,6 +137,7 @@ function renderUnifiedLoanDetail(loan, userId, role) {
                         <p class="text-slate-700">${loan.purpose || 'Not specified'}</p>
                     </div>
                 </div>
+    `;
     `;
 
     // Witnesses Section
@@ -151,8 +228,10 @@ function renderUnifiedLoanDetail(loan, userId, role) {
         `;
 
         loanHistory.forEach(historicalLoan => {
-            const historicalDays = calculateDaysRemaining(historicalLoan);
+            const historicalDurationInfo = calculateDurationInfo(historicalLoan);
+            const historicalDays = historicalDurationInfo.daysRemaining;
             const historicalBadge = getStatusBadge(historicalLoan.status);
+            const historicalScoreBadge = getScoreBadge(historicalDurationInfo.score);
 
             html += `
                 <div class="flex justify-between items-center py-2 border-b border-slate-200 last:border-0">
@@ -161,6 +240,11 @@ function renderUnifiedLoanDetail(loan, userId, role) {
                         <span class="text-sm text-slate-500 ml-2">${formatDate(historicalLoan.appliedAt)}</span>
                     </div>
                     <div class="flex items-center gap-3">
+                        ${(historicalLoan.status === 'paid' || historicalLoan.status === 'disbursed' || historicalLoan.status === 'partially_paid') ? `
+                            <span class="px-2 py-0.5 rounded text-xs font-medium ${historicalScoreBadge.bg} ${historicalScoreBadge.text}">
+                                ${historicalDurationInfo.score}
+                            </span>
+                        ` : ''}
                         ${historicalDays !== null ? `
                             <span class="text-sm">${formatDaysRemaining(historicalDays)}</span>
                         ` : ''}
