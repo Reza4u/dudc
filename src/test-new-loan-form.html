@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEW Loan Form Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F766E',
+                        secondary: '#0D9488',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 p-8">
+    <div id="formContainer"></div>
+
+    <script>
+        // Render the NEW loan form directly
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 60);
+        const maxDateStr = maxDate.toISOString().split('T')[0];
+        const minDateStr = new Date().toISOString().split('T')[0];
+
+        document.getElementById('formContainer').innerHTML = `
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6">Apply for Qarze Hasana - NEW VERSION</h2>
+                
+                <form id="loanForm" class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 space-y-8">
+                    
+                    <!-- Section 1: Loan Details -->
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2">Section 1: Loan Details</h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Reason for Loan *</label>
+                            <textarea id="loanReason" required rows="4" 
+                                class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                                placeholder="Please describe why you need this loan..."></textarea>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Amount Needed (BDT) *</label>
+                                <input type="number" id="loanAmount" min="500" max="3000" required 
+                                    class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" 
+                                    placeholder="Min 500, Max 3000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Estimated Repayment Date *</label>
+                                <input type="date" id="loanDate" min="${minDateStr}" max="${maxDateStr}" required 
+                                    class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
+                                <p class="text-xs text-slate-500 mt-1">Max 60 days from today</p>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Receive Money Via *</label>
+                                <select id="paymentMethod" required class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
+                                    <option value="">Select Method</option>
+                                    <option value="Bkash">Bkash</option>
+                                    <option value="Nagad">Nagad</option>
+                                    <option value="Rocket">Rocket</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Account Number *</label>
+                                <input type="tel" id="accountNumber" pattern="01[0-9]{9}" required 
+                                    class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none" 
+                                    placeholder="01XXXXXXXXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Witness Details -->
+                    <div class="space-y-6">
+                        <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2">Section 2: Witness Details</h3>
+                        
+                        <div class="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
+                            <p class="mb-2"><strong>Note:</strong> After submission, a representative from "Dhaka University Dawah Circle" will verify your application. They will act as your institutional witness.</p>
+                            <p>You must provide a personal witness (1 male or 2 females) who is aware of this loan.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-3">Select Witness Type *</label>
+                            <div class="flex gap-6">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="witnessType" value="male" checked class="w-4 h-4 text-primary focus:ring-primary">
+                                    <span class="ml-2 text-slate-700">One Male Witness</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="witnessType" value="female" class="w-4 h-4 text-primary focus:ring-primary">
+                                    <span class="ml-2 text-slate-700">Two Female Witnesses</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Male Witness Form -->
+                        <div id="maleWitnessForm" class="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <h4 class="font-semibold text-slate-800">Male Witness Details</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+                                    <input type="text" id="maleWitnessName" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Relationship *</label>
+                                    <input type="text" id="maleWitnessRelation" placeholder="e.g. Brother, Friend" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Mobile Number *</label>
+                                    <input type="tel" id="maleWitnessPhone" pattern="01[0-9]{9}" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                </div>
+                            </div>
+                            <label class="flex items-start gap-2 text-sm text-slate-600 cursor-pointer">
+                                <input type="checkbox" id="maleWitnessConsent" class="mt-1 text-primary focus:ring-primary rounded">
+                                <span>My witness is fully aware of this loan and is over 18 years old.</span>
+                            </label>
+                        </div>
+
+                        <!-- Female Witnesses Form -->
+                        <div id="femaleWitnessForm" class="hidden space-y-6">
+                            <!-- Female Witness 1 -->
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                                <h4 class="font-semibold text-slate-800">First Female Witness</h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+                                        <input type="text" id="femaleWitness1Name" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Relationship *</label>
+                                        <input type="text" id="femaleWitness1Relation" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Mobile Number *</label>
+                                        <input type="tel" id="femaleWitness1Phone" pattern="01[0-9]{9}" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                    </div>
+                                </div>
+                                <label class="flex items-start gap-2 text-sm text-slate-600 cursor-pointer">
+                                    <input type="checkbox" id="femaleWitness1Consent" class="mt-1 text-primary focus:ring-primary rounded">
+                                    <span>My witness is fully aware of this loan and is over 18 years old.</span>
+                                </label>
+                            </div>
+
+                            <!-- Female Witness 2 -->
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-4">
+                                <h4 class="font-semibold text-slate-800">Second Female Witness</h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+                                        <input type="text" id="femaleWitness2Name" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Relationship *</label>
+                                        <input type="text" id="femaleWitness2Relation" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Mobile Number *</label>
+                                        <input type="tel" id="femaleWitness2Phone" pattern="01[0-9]{9}" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none">
+                                    </div>
+                                </div>
+                                <label class="flex items-start gap-2 text-sm text-slate-600 cursor-pointer">
+                                    <input type="checkbox" id="femaleWitness2Consent" class="mt-1 text-primary focus:ring-primary rounded">
+                                    <span>My witness is fully aware of this loan and is over 18 years old.</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Declaration -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2">Section 3: Declaration</h3>
+                        
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" id="declaration" required class="mt-1 w-5 h-5 text-primary focus:ring-primary rounded">
+                                <span class="text-sm text-slate-800 font-medium leading-relaxed">
+                                    I pledge in the name of Allah that I will be bound to repay the full loan within the stipulated time and all information provided by me is correct and accurate.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" id="submitLoanBtn" disabled class="w-full bg-slate-300 text-slate-500 py-3 rounded-xl font-semibold shadow-none cursor-not-allowed transition-all">
+                            Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        lucide.createIcons();
+
+        // Toggle Witness Forms
+        const maleForm = document.getElementById('maleWitnessForm');
+        const femaleForm = document.getElementById('femaleWitnessForm');
+        const radios = document.getElementsByName('witnessType');
+
+        radios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'male') {
+                    maleForm.classList.remove('hidden');
+                    femaleForm.classList.add('hidden');
+                } else {
+                    maleForm.classList.add('hidden');
+                    femaleForm.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Enable submit on declaration
+        const declaration = document.getElementById('declaration');
+        const submitBtn = document.getElementById('submitLoanBtn');
+
+        declaration.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-slate-300', 'text-slate-500', 'cursor-not-allowed', 'shadow-none');
+                submitBtn.classList.add('bg-primary', 'hover:bg-secondary', 'text-white', 'shadow-md', 'cursor-pointer');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('bg-slate-300', 'text-slate-500', 'cursor-not-allowed', 'shadow-none');
+                submitBtn.classList.remove('bg-primary', 'hover:bg-secondary', 'text-white', 'shadow-md', 'cursor-pointer');
+            }
+        });
+
+        // Form Submit
+        document.getElementById('loanForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('✅ NEW FORM WORKS! This is the updated 3-section form.');
+        });
+    </script>
+</body>
+
+</html>

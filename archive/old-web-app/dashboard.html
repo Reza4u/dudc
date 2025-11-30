@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | DU Qarze Hasana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F766E',
+                        secondary: '#0D9488',
+                        dark: '#0F172A',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col z-10" id="sidebar">
+        <div class="h-20 flex items-center px-6 border-b border-slate-100 cursor-pointer"
+            onclick="window.location.href='index.html'">
+            <div
+                class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold mr-3">
+                Q</div>
+            <span class="font-bold text-lg text-slate-800">DU Qarze Hasana</span>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <button onclick="renderView('overview')"
+                class="nav-item w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl transition group active">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="font-medium">Overview</span>
+            </button>
+
+            <button onclick="renderView('verification')"
+                class="nav-item w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl transition group">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="font-medium">Verification</span>
+            </button>
+
+            <button onclick="renderView('loan-request')"
+                class="nav-item w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl transition group">
+                <i data-lucide="hand-coins" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="font-medium">Apply for Loan</span>
+            </button>
+
+            <button onclick="renderView('history')"
+                class="nav-item w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl transition group">
+                <i data-lucide="history" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="font-medium">History</span>
+            </button>
+
+            <button onclick="renderView('settings')"
+                class="nav-item w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-primary rounded-xl transition group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:scale-110 transition"></i>
+                <span class="font-medium">Settings</span>
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="auth.logout()"
+                class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span class="font-medium">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Mobile Header -->
+        <header class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 z-20">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
+                    Q</div>
+                <span class="font-bold text-lg text-slate-800">Dashboard</span>
+            </div>
+            <button class="text-slate-600" id="mobileMenuBtn">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </header>
+
+        <!-- Content Area -->
+        <div id="content-area" class="flex-1 overflow-y-auto p-4 md:p-8">
+            <!-- Dynamic Content Loaded Here -->
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+
+    <!-- Mobile Menu Script -->
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.getElementById('sidebar');
+
+            if (mobileMenuBtn && sidebar) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('hidden');
+                    sidebar.classList.toggle('flex');
+                    sidebar.classList.toggle('absolute');
+                    sidebar.classList.toggle('inset-y-0');
+                    sidebar.classList.toggle('left-0');
+                    sidebar.classList.toggle('z-50');
+                    sidebar.classList.toggle('shadow-2xl');
+                });
+
+                // Close menu when clicking nav items on mobile
+                const navItems = sidebar.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth < 768) {
+                            sidebar.classList.add('hidden');
+                            sidebar.classList.remove('flex', 'absolute', 'inset-y-0', 'left-0', 'z-50', 'shadow-2xl');
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate | DU Qarze Hasana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F766E',
+                        secondary: '#0D9488',
+                        accent: '#F59E0B',
+                        dark: '#0F172A',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300 glass" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                    onclick="window.location.href='index.html'">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        Q
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">DU Qarze Hasana</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-slate-600 hover:text-primary font-medium transition">Home</a>
+                    <a href="index.html#about" class="text-slate-600 hover:text-primary font-medium transition">About
+                        Us</a>
+                    <a href="#" class="text-primary font-bold transition">Donate</a>
+                    <a href="login.html" class="text-slate-600 hover:text-primary font-medium transition">Login</a>
+                    <a href="register.html"
+                        class="bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-full font-medium transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="pt-32 pb-12 bg-primary text-center text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 pattern-dots"></div>
+        <div class="max-w-3xl mx-auto px-4 relative z-10">
+            <h1 class="text-4xl font-bold mb-4">Make a Difference Today</h1>
+            <p class="text-teal-100 text-lg">Your contribution helps students continue their education without financial
+                burden. Every Taka counts.</p>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 pb-20 relative z-20">
+        <div class="grid md:grid-cols-2 gap-8">
+
+            <!-- Payment Instructions -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 animate-fade-in">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i data-lucide="smartphone" class="w-6 h-6 text-primary"></i> Step 1: Send Money
+                </h2>
+
+                <div class="space-y-4">
+                    <div class="p-4 border border-pink-100 bg-pink-50 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center text-white font-bold">
+                                b</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Bkash (Personal)</p>
+                                <p class="text-slate-600">01671-XXXXXX</p>
+                            </div>
+                        </div>
+                        <button class="text-pink-600 hover:text-pink-700 font-medium text-sm">Copy</button>
+                    </div>
+
+                    <div class="p-4 border border-orange-100 bg-orange-50 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
+                                N</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Nagad (Personal)</p>
+                                <p class="text-slate-600">01671-XXXXXX</p>
+                            </div>
+                        </div>
+                        <button class="text-orange-600 hover:text-orange-700 font-medium text-sm">Copy</button>
+                    </div>
+
+                    <div class="p-4 border border-purple-100 bg-purple-50 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+                                R</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Rocket (Personal)</p>
+                                <p class="text-slate-600">01671-XXXXXX</p>
+                            </div>
+                        </div>
+                        <button class="text-purple-600 hover:text-purple-700 font-medium text-sm">Copy</button>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm flex gap-2">
+                    <i data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+                    <p>Please use Reference: <strong>"QDAN"</strong> when sending money. Keep the Transaction ID (TrxID)
+                        safe.</p>
+                </div>
+            </div>
+
+            <!-- Donation Form -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 animate-fade-in delay-100">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i data-lucide="file-check" class="w-6 h-6 text-primary"></i> Step 2: Confirm Donation
+                </h2>
+
+                <form id="donationForm" class="space-y-4">
+                    <div id="successMessage"
+                        class="hidden bg-green-50 text-green-600 p-3 rounded-lg text-sm text-center">
+                        Thank you! Your donation details have been submitted. May Allah reward you.
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Do you want to remain
+                            anonymous?</label>
+                        <div class="flex gap-4 mt-2">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="anonymous" value="yes"
+                                    class="text-primary focus:ring-primary">
+                                <span>Yes</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="anonymous" value="no" checked
+                                    class="text-primary focus:ring-primary">
+                                <span>No</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="personalInfo">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                                <input type="text"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                                    placeholder="Your Name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                <input type="email"
+                                    class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                                    placeholder="Email (Optional)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Amount (BDT)</label>
+                            <input type="number" required
+                                class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                                placeholder="e.g. 1000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Payment Method</label>
+                            <select
+                                class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
+                                <option>Bkash</option>
+                                <option>Nagad</option>
+                                <option>Rocket</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Sender Number</label>
+                        <input type="text" required
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                            placeholder="01XXXXXXXXX">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Transaction ID (TrxID)</label>
+                        <input type="text"
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                            placeholder="9J7X3YXXXX">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Message (Optional)</label>
+                        <textarea
+                            class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none"
+                            rows="2" placeholder="Any advice or feedback..."></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
+                        Submit Donation Details
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Toggle Personal Info
+        const radioButtons = document.querySelectorAll('input[name="anonymous"]');
+        const personalInfo = document.getElementById('personalInfo');
+
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'yes') {
+                    personalInfo.classList.add('hidden');
+                } else {
+                    personalInfo.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Handle Form Submit
+        document.getElementById('donationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            document.getElementById('successMessage').classList.remove('hidden');
+            e.target.reset();
+        });
+    </script>
+</body>
+
+</html>

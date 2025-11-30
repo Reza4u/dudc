@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Email | DU Qarze Hasana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F766E',
+                        secondary: '#0D9488',
+                        dark: '#0F172A',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in text-center p-8">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-6">
+            <i data-lucide="mail-check" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mb-2">Check your mail</h2>
+        <p class="text-slate-600 mb-8">We have sent a password recover instructions to your email.</p>
+
+        <a href="reset-password.html"
+            class="block w-full bg-primary hover:bg-secondary text-white py-3 rounded-lg font-semibold shadow-md transition mb-4">
+            Open Email App
+        </a>
+
+        <p class="text-sm text-slate-500">
+            Did not receive the email? <a href="#" class="text-primary font-medium hover:underline">Click to resend</a>
+        </p>
+
+        <div class="mt-8">
+            <a href="login.html"
+                class="text-slate-600 hover:text-primary font-medium flex items-center justify-center gap-2">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

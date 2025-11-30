@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow">
+        <h1 class="text-2xl font-bold mb-4">Dashboard Test Page</h1>
+        <div id="status" class="mb-4 p-4 bg-blue-50 rounded">Checking...</div>
+        <div id="user-info" class="p-4 bg-gray-50 rounded"></div>
+    </div>
+
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script>
+        const status = document.getElementById('status');
+        const userInfo = document.getElementById('user-info');
+
+        console.log('Test page loaded');
+        console.log('window.db:', window.db);
+        console.log('window.auth:', window.auth);
+
+        if (window.db && window.auth) {
+            status.textContent = '✅ Scripts loaded successfully!';
+            status.className = 'mb-4 p-4 bg-green-50 text-green-700 rounded';
+
+            const user = window.db.getCurrentUser();
+            console.log('Current user:', user);
+
+            if (user) {
+                userInfo.innerHTML = `
+                    <h2 class="font-bold mb-2">Logged in user:</h2>
+                    <pre class="bg-white p-2 rounded border">${JSON.stringify(user, null, 2)}</pre>
+                    <button onclick="window.location.href='dashboard.html'" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+                        Go to Real Dashboard
+                    </button>
+                    <button onclick="auth.logout()" class="mt-4 px-4 py-2 bg-red-500 text-white rounded ml-2">
+                        Logout
+                    </button>
+                `;
+            } else {
+                userInfo.innerHTML = `
+                    <p class="text-red-600">❌ No user logged in</p>
+                    <a href="login.html" class="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded">
+                        Go to Login
+                    </a>
+                `;
+            }
+        } else {
+            status.textContent = '❌ Scripts failed to load!';
+            status.className = 'mb-4 p-4 bg-red-50 text-red-700 rounded';
+
+            if (!window.db) console.error('data.js not loaded');
+            if (!window.auth) console.error('auth.js not loaded');
+        }
+    </script>
+</body>
+
+</html>
