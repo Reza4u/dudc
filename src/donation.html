@@ -49,6 +49,28 @@
                         Get Started
                     </a>
                 </div>
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-primary focus:outline-none p-2" onclick="toggleMobileMenu()" aria-label="Toggle menu" aria-expanded="false">
+                        <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
+                        <i data-lucide="x" class="w-6 h-6 hidden" id="close-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-lg">
+            <div class="px-4 py-4 space-y-3">
+                <a href="index.html" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">Home</a>
+                <a href="index.html#about" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">About Us</a>
+                <a href="#" class="block text-primary font-bold py-2 px-3 rounded-lg bg-teal-50">Donate</a>
+                <div class="border-t border-slate-100 pt-3 mt-3">
+                    <a href="login.html" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">Login</a>
+                    <a href="register.html" class="block bg-primary hover:bg-secondary text-white text-center py-3 px-4 rounded-full font-medium transition mt-2">
+                        Get Started
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -216,6 +238,21 @@
 
     <script>
         lucide.createIcons();
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            
+            mobileMenu.classList.toggle('hidden');
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+            
+            const isExpanded = !mobileMenu.classList.contains('hidden');
+            menuBtn.setAttribute('aria-expanded', isExpanded);
+        }
 
         // Toggle Personal Info
         const radioButtons = document.querySelectorAll('input[name="anonymous"]');

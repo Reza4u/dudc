@@ -15,6 +15,7 @@
                     colors: {
                         primary: '#0F766E',
                         secondary: '#0D9488',
+                        accent: '#F59E0B',
                         dark: '#0F172A',
                     }
                 }
@@ -23,107 +24,249 @@
     </script>
 </head>
 
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 py-10">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in">
-        <div class="p-8">
-            <div class="text-center mb-8">
-                <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-2xl shadow-lg mx-auto mb-4 cursor-pointer"
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 transition-all duration-300 glass" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer"
                     onclick="window.location.href='index.html'">
-                    Q
+                    <div class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        Q
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">DU Qarze Hasana</span>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-900">Create Account</h2>
-                <p class="text-slate-500 mt-2">Join the community of mutual support</p>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-slate-600 hover:text-primary font-medium transition">Home</a>
+                    <a href="index.html#how-it-works" class="text-slate-600 hover:text-primary font-medium transition">How it Works</a>
+                    <a href="index.html#about" class="text-slate-600 hover:text-primary font-medium transition">About Us</a>
+                    <a href="login.html" class="text-slate-600 hover:text-primary font-medium transition">Login</a>
+                    <a href="register.html" class="bg-primary hover:bg-secondary text-white px-5 py-2.5 rounded-full font-medium transition shadow-lg">
+                        Get Started
+                    </a>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-primary focus:outline-none p-2" onclick="toggleMobileMenu()" aria-label="Toggle menu" aria-expanded="false">
+                        <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
+                        <i data-lucide="x" class="w-6 h-6 hidden" id="close-icon"></i>
+                    </button>
+                </div>
             </div>
+        </div>
+        
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 shadow-lg">
+            <div class="px-4 py-4 space-y-3">
+                <a href="index.html" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">Home</a>
+                <a href="index.html#how-it-works" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">How it Works</a>
+                <a href="index.html#about" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">About Us</a>
+                <div class="border-t border-slate-100 pt-3 mt-3">
+                    <a href="login.html" class="block text-slate-600 hover:text-primary font-medium py-2 px-3 rounded-lg hover:bg-slate-50 transition">Login</a>
+                    <a href="register.html" class="block bg-primary hover:bg-secondary text-white text-center py-3 px-4 rounded-full font-medium transition mt-2">
+                        Get Started
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-            <form id="registerForm" class="space-y-5">
-                <!-- Error Message -->
-                <div id="errorMessage" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm text-center"></div>
-                <!-- Success Message -->
-                <div id="successMessage" class="hidden bg-green-50 text-green-600 p-3 rounded-lg text-sm text-center">
+    <!-- Registration Form -->
+    <section class="flex-1 flex items-center justify-center pt-28 pb-12 px-4">
+        <div class="w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-slate-100">
+                <div class="text-center mb-8">
+                    <h1 class="text-2xl font-bold text-slate-900 mb-2">Create Your Account</h1>
+                    <p class="text-slate-500">Join DU Qarze Hasana today</p>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+                <form id="registerForm" class="space-y-5" novalidate>
+                    <!-- Full Name -->
+                    <div>
+                        <label for="fullName" class="block text-sm font-medium text-slate-700 mb-1">
+                            Full Name <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="user" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="text" id="fullName" name="fullName" required minlength="3"
+                                class="w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                placeholder="Enter your full name"
+                                aria-describedby="fullNameError"
+                                autocomplete="name">
+                            <i data-lucide="check-circle" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500 hidden" id="fullNameSuccess"></i>
                         </div>
-                        <input type="text" id="name" required
-                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
-                            placeholder="John Doe">
+                        <p class="text-red-500 text-sm mt-1 hidden flex items-center gap-1" id="fullNameError" role="alert">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            Name must be at least 3 characters
+                        </p>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="mail" class="w-5 h-5 text-slate-400"></i>
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">
+                            Email Address <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="mail" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="email" id="email" name="email" required
+                                class="w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                placeholder="your.email@example.com"
+                                aria-describedby="emailError emailHint"
+                                autocomplete="email">
+                            <i data-lucide="check-circle" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500 hidden" id="emailSuccess"></i>
                         </div>
-                        <input type="email" id="email" required
-                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
-                            placeholder="student@du.ac.bd">
+                        <p class="text-slate-400 text-xs mt-1" id="emailHint">Use your primary email address</p>
+                        <p class="text-red-500 text-sm mt-1 hidden flex items-center gap-1" id="emailError" role="alert">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            Please enter a valid email address
+                        </p>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Registration No.</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="hash" class="w-5 h-5 text-slate-400"></i>
+                    <!-- Phone Number with BD Code -->
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-slate-700 mb-1">
+                            Phone Number <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <div class="flex">
+                            <!-- Country Code -->
+                            <div class="flex items-center px-3 py-3 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-slate-600 font-medium text-sm">
+                                <img src="https://flagcdn.com/w20/bd.png" alt="BD" class="w-5 h-auto mr-2">
+                                +88
+                            </div>
+                            <div class="relative flex-1">
+                                <input type="tel" id="phone" name="phone" required
+                                    class="w-full pl-4 pr-10 py-3 border border-slate-200 rounded-r-xl focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                    placeholder="01XXXXXXXXX"
+                                    maxlength="11"
+                                    aria-describedby="phoneError phoneHint"
+                                    autocomplete="tel">
+                                <i data-lucide="check-circle" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500 hidden" id="phoneSuccess"></i>
+                            </div>
                         </div>
-                        <input type="text" id="regNo" required
-                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
-                            placeholder="2020XXXXXX">
+                        <p class="text-red-500 text-sm mt-1 hidden flex items-center gap-1" id="phoneError" role="alert">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            Please enter a valid phone number
+                        </p>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
+                    <!-- DU Registration No -->
+                    <div>
+                        <label for="regNo" class="block text-sm font-medium text-slate-700 mb-1">
+                            DU Registration No <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="id-card" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="text" id="regNo" name="regNo" required
+                                class="w-full pl-10 pr-10 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                placeholder="2019-413-889"
+                                aria-describedby="regNoError regNoHint"
+                                autocomplete="off">
+                            <i data-lucide="check-circle" class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500 hidden" id="regNoSuccess"></i>
                         </div>
-                        <input type="password" id="password" required
-                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
-                            placeholder="••••••••">
+                        <p class="text-slate-400 text-xs mt-1" id="regNoHint">Format: YYYY-XXX-XXX (e.g., 2019-413-889)</p>
+                        <p class="text-red-500 text-sm mt-1 hidden flex items-center gap-1" id="regNoError" role="alert">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            Please enter a valid registration number (YYYY-XXX-XXX)
+                        </p>
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">
+                            Password <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="password" id="password" name="password" required minlength="6"
+                                class="w-full pl-10 pr-12 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                placeholder="Min. 6 characters"
+                                aria-describedby="passwordError passwordStrengthText"
+                                autocomplete="new-password">
+                            <button type="button" onclick="togglePassword('password', 'toggleIcon1')" 
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
+                                aria-label="Toggle password visibility">
+                                <i data-lucide="eye" class="w-5 h-5" id="toggleIcon1"></i>
+                            </button>
                         </div>
-                        <input type="password" id="confirmPassword" required
-                            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"
-                            placeholder="••••••••">
+                        <p class="text-red-500 text-sm mt-1 hidden flex items-center gap-1" id="passwordError" role="alert">>
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            Password must be at least 6 characters
+                        </p>
                     </div>
-                </div>
 
-                <button type="submit"
-                    class="w-full bg-primary hover:bg-secondary text-white py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
-                    Create Account
-                </button>
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-slate-700 mb-1">
+                            Confirm Password <span class="text-red-500" aria-hidden="true">*</span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required
+                                class="w-full pl-10 pr-12 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                                placeholder="Re-enter your password"
+                                aria-describedby="confirmPasswordError"
+                                autocomplete="new-password">
+                            <button type="button" onclick="togglePassword('confirmPassword', 'toggleIcon2')" 
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none p-1"
+                                aria-label="Toggle password visibility">
+                                <i data-lucide="eye" class="w-5 h-5" id="toggleIcon2"></i>
+                            </button>
+                        </div>
+                        <p class="text-red-500 text-sm mt-1 hidden flex items-center gap-1" id="confirmPasswordError" role="alert">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            Passwords do not match
+                        </p>
+                        <p class="text-green-500 text-sm mt-1 hidden flex items-center gap-1" id="confirmPasswordSuccess">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            Passwords match
+                        </p>
+                    </div>
 
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-slate-200"></div>
-                    <span class="flex-shrink-0 mx-4 text-slate-400 text-sm">Or join with</span>
-                    <div class="flex-grow border-t border-slate-200"></div>
-                </div>
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn"
+                        class="w-full bg-primary hover:bg-secondary text-white py-3.5 rounded-xl font-semibold transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-primary">
+                        <span id="btnText">Create Account</span>
+                        <svg class="animate-spin h-5 w-5 text-white hidden" id="btnLoader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <i data-lucide="arrow-right" class="w-5 h-5" id="btnArrow"></i>
+                    </button>
 
-                <button type="button" onclick="handleGoogleLogin()"
-                    class="w-full bg-white border border-slate-200 text-slate-700 py-3 rounded-lg font-semibold hover:bg-slate-50 transition flex items-center justify-center gap-3">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
-                    Sign up with Google
-                </button>
-            </form>
+                    <!-- Divider -->
+                    <div class="relative flex py-2 items-center">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span class="flex-shrink-0 mx-4 text-slate-400 text-sm">Or join with</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
+                    </div>
 
-            <div class="mt-8 text-center">
-                <p class="text-slate-600">Already have an account? <a href="login.html"
-                        class="text-primary font-semibold hover:underline">Sign In</a></p>
+                    <!-- Google Button -->
+                    <button type="button" onclick="handleGoogleLogin()"
+                        class="w-full bg-white border border-slate-200 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-50 transition flex items-center justify-center gap-3">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                        Sign up with Google
+                    </button>
+                </form>
+
+                <!-- Login Link -->
+                <p class="text-center text-slate-500 mt-6">
+                    Already have an account? 
+                    <a href="login.html" class="text-primary hover:text-secondary font-semibold transition">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 left-4 sm:left-auto transform translate-y-full opacity-0 transition-all duration-300 z-50" role="alert" aria-live="polite">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 p-4 flex items-center gap-3 max-w-sm mx-auto sm:mx-0">
+            <div id="toastIcon" class="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p id="toastTitle" class="font-semibold text-slate-900">Success</p>
+                <p id="toastMessage" class="text-sm text-slate-500">Operation completed</p>
             </div>
         </div>
     </div>
@@ -133,80 +276,348 @@
     <script>
         lucide.createIcons();
 
-        // Form validation functions
+        // ===== Mobile Menu Toggle =====
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            
+            mobileMenu.classList.toggle('hidden');
+            menuIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+            
+            const isExpanded = !mobileMenu.classList.contains('hidden');
+            menuBtn.setAttribute('aria-expanded', isExpanded);
+        }
+
+        // ===== Toggle Password Visibility =====
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        // ===== Show Toast =====
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toastIcon');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600';
+                toastIcon.innerHTML = '<i data-lucide="check-circle" class="w-6 h-6"></i>';
+            } else {
+                toastIcon.className = 'w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-red-600';
+                toastIcon.innerHTML = '<i data-lucide="x-circle" class="w-6 h-6"></i>';
+            }
+            lucide.createIcons();
+            
+            toast.classList.remove('translate-y-full', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 4000);
+        }
+
+        // ===== Validation Functions =====
+        
         function validateEmail(email) {
-            const duEmailPattern = /^[a-zA-Z0-9._-]+@du\.ac\.bd$/;
-            return duEmailPattern.test(email);
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validatePhone(phone) {
+            const cleanPhone = phone.replace(/[\s-]/g, '');
+            // 11 digits starting with 01 OR 10 digits starting with 1
+            if (cleanPhone.length === 11 && /^01[3-9]\d{8}$/.test(cleanPhone)) return true;
+            if (cleanPhone.length === 10 && /^1[3-9]\d{8}$/.test(cleanPhone)) return true;
+            return false;
         }
 
         function validateRegNo(regNo) {
-            return /^\d{8,12}$/.test(regNo);
+            // Format: YYYY-XXX-XXX
+            return /^\d{4}-\d{3}-\d{3}$/.test(regNo);
         }
 
         function validatePassword(password) {
             return password.length >= 6;
         }
 
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
+        // ===== Password Strength (Simple) =====
+        function updatePasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthText = document.getElementById('passwordStrengthText');
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-zA-Z]/) && password.match(/\d/)) strength++;
+            
+            const colors = ['bg-red-500', 'bg-yellow-500', 'bg-green-500'];
+            const texts = ['Weak', 'Fair', 'Good'];
+            const textColors = ['text-red-500', 'text-yellow-500', 'text-green-500'];
+            
+            // Reset bars
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`strength${i}`).className = 'h-1.5 flex-1 rounded-full bg-slate-200 transition-all duration-300';
+            }
+            
+            // Fill bars
+            for (let i = 1; i <= strength; i++) {
+                document.getElementById(`strength${i}`).className = `h-1.5 flex-1 rounded-full ${colors[strength - 1]} transition-all duration-300`;
+            }
+            
+            if (password.length === 0) {
+                strengthText.textContent = 'Enter a password';
+                strengthText.className = 'text-xs mt-1 text-slate-400';
+            } else {
+                strengthText.textContent = texts[strength - 1] || 'Too weak';
+                strengthText.className = `text-xs mt-1 ${textColors[strength - 1] || 'text-red-500'}`;
+            }
+        }
+
+        // ===== Show/Hide Error =====
+        function showError(fieldId, errorId, show = true) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(errorId);
+            const successIcon = document.getElementById(fieldId + 'Success');
+            
+            if (show) {
+                error.classList.remove('hidden');
+                field.classList.add('border-red-500');
+                field.classList.remove('border-slate-200', 'border-green-500');
+                if (successIcon) successIcon.classList.add('hidden');
+            } else {
+                error.classList.add('hidden');
+                field.classList.remove('border-red-500');
+                field.classList.add('border-slate-200');
+            }
+            lucide.createIcons();
+        }
+
+        function showSuccess(fieldId) {
+            const field = document.getElementById(fieldId);
+            const successIcon = document.getElementById(fieldId + 'Success');
+            
+            field.classList.remove('border-red-500', 'border-slate-200');
+            field.classList.add('border-green-500');
+            if (successIcon) successIcon.classList.remove('hidden');
+        }
+
+        // ===== Real-time Validation =====
+        
+        // Full Name
+        document.getElementById('fullName').addEventListener('input', function() {
+            if (this.value.length >= 3) {
+                showError('fullName', 'fullNameError', false);
+                showSuccess('fullName');
+            } else if (this.value.length > 0) {
+                showError('fullName', 'fullNameError', true);
+            }
+        });
+
+        // Email
+        document.getElementById('email').addEventListener('input', function() {
+            if (validateEmail(this.value)) {
+                showError('email', 'emailError', false);
+                showSuccess('email');
+            } else if (this.value.length > 0 && this.value.includes('@')) {
+                showError('email', 'emailError', true);
+            }
+        });
+
+        // Phone
+        document.getElementById('phone').addEventListener('input', function() {
+            // Only allow digits
+            this.value = this.value.replace(/\D/g, '');
+            
+            if (validatePhone(this.value)) {
+                showError('phone', 'phoneError', false);
+                showSuccess('phone');
+            } else if (this.value.length >= 10) {
+                showError('phone', 'phoneError', true);
+            }
+        });
+
+        // Registration No - Auto format
+        document.getElementById('regNo').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            
+            // Auto-format with dashes
+            if (value.length > 4) {
+                value = value.substring(0, 4) + '-' + value.substring(4);
+            }
+            if (value.length > 8) {
+                value = value.substring(0, 8) + '-' + value.substring(8);
+            }
+            if (value.length > 12) {
+                value = value.substring(0, 12);
+            }
+            
+            this.value = value;
+            
+            if (validateRegNo(this.value)) {
+                showError('regNo', 'regNoError', false);
+                showSuccess('regNo');
+            } else if (this.value.length > 0) {
+                showError('regNo', 'regNoError', true);
+            }
+        });
+
+        // Password
+        document.getElementById('password').addEventListener('input', function() {
+            updatePasswordStrength();
+            
+            if (validatePassword(this.value)) {
+                showError('password', 'passwordError', false);
+            } else if (this.value.length > 0) {
+                showError('password', 'passwordError', true);
+            }
+            
+            // Also check confirm password
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (confirmPassword) {
+                checkPasswordMatch();
+            }
+        });
+
+        // Confirm Password
+        document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorEl = document.getElementById('confirmPasswordError');
+            const successEl = document.getElementById('confirmPasswordSuccess');
+            const field = document.getElementById('confirmPassword');
+            
+            if (confirmPassword.length === 0) {
+                errorEl.classList.add('hidden');
+                successEl.classList.add('hidden');
+                field.classList.remove('border-red-500', 'border-green-500');
+                field.classList.add('border-slate-200');
+                return;
+            }
+            
+            if (password === confirmPassword && password.length >= 6) {
+                errorEl.classList.add('hidden');
+                successEl.classList.remove('hidden');
+                field.classList.remove('border-red-500', 'border-slate-200');
+                field.classList.add('border-green-500');
+            } else {
+                errorEl.classList.remove('hidden');
+                successEl.classList.add('hidden');
+                field.classList.add('border-red-500');
+                field.classList.remove('border-slate-200', 'border-green-500');
+            }
+            lucide.createIcons();
+        }
+
+        // ===== Form Submit =====
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const name = document.getElementById('name').value.trim();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const btnArrow = document.getElementById('btnArrow');
+            
+            // Get values
+            const fullName = document.getElementById('fullName').value.trim();
             const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             const regNo = document.getElementById('regNo').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            const errorDiv = document.getElementById('errorMessage');
-            const successDiv = document.getElementById('successMessage');
+            // Validate all
+            let isValid = true;
 
-            errorDiv.classList.add('hidden');
-            successDiv.classList.add('hidden');
-
-            // Validation checks
-            if (!name || name.length < 3) {
-                errorDiv.textContent = "Please enter a valid name (minimum 3 characters)";
-                errorDiv.classList.remove('hidden');
-                return;
+            if (fullName.length < 3) {
+                showError('fullName', 'fullNameError', true);
+                isValid = false;
             }
 
             if (!validateEmail(email)) {
-                errorDiv.textContent = "Please use a valid DU email address (@du.ac.bd)";
-                errorDiv.classList.remove('hidden');
-                return;
+                showError('email', 'emailError', true);
+                isValid = false;
+            }
+
+            if (!validatePhone(phone)) {
+                showError('phone', 'phoneError', true);
+                isValid = false;
             }
 
             if (!validateRegNo(regNo)) {
-                errorDiv.textContent = "Please enter a valid registration number (8-12 digits)";
-                errorDiv.classList.remove('hidden');
-                return;
+                showError('regNo', 'regNoError', true);
+                isValid = false;
             }
 
             if (!validatePassword(password)) {
-                errorDiv.textContent = "Password must be at least 6 characters long";
-                errorDiv.classList.remove('hidden');
-                return;
+                showError('password', 'passwordError', true);
+                isValid = false;
             }
 
             if (password !== confirmPassword) {
-                errorDiv.textContent = "Passwords do not match!";
-                errorDiv.classList.remove('hidden');
+                document.getElementById('confirmPasswordError').classList.remove('hidden');
+                document.getElementById('confirmPassword').classList.add('border-red-500');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showToast('Error!', 'Please fill all fields correctly', 'error');
                 return;
             }
 
-            const result = auth.register(name, email, regNo, password);
+            // Show loading
+            submitBtn.disabled = true;
+            btnText.textContent = 'Please wait...';
+            btnLoader.classList.remove('hidden');
+            btnArrow.classList.add('hidden');
+
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Format phone with leading 0 if needed
+            let formattedPhone = phone;
+            if (phone.length === 10 && phone.startsWith('1')) {
+                formattedPhone = '0' + phone;
+            }
+
+            // Try to register
+            const result = auth.register(fullName, email, regNo, password);
 
             if (result.success) {
-                successDiv.textContent = result.message;
-                successDiv.classList.remove('hidden');
-                e.target.reset();
+                showToast('Success!', 'Account created. Redirecting to login...', 'success');
+                
                 setTimeout(() => {
                     window.location.href = 'login.html';
                 }, 2000);
             } else {
-                errorDiv.textContent = result.message;
-                errorDiv.classList.remove('hidden');
+                showToast('Error!', result.message, 'error');
+                submitBtn.disabled = false;
+                btnText.textContent = 'Create Account';
+                btnLoader.classList.add('hidden');
+                btnArrow.classList.remove('hidden');
             }
         });
 
+        // ===== Google Login =====
         function handleGoogleLogin() {
             const result = auth.googleLogin();
             if (result.success) {

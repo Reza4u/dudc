@@ -1140,6 +1140,9 @@ let repaymentFilterState = {
 
 function renderRepaymentVerification() {
     const repayments = window.db.getRepayments();
+    
+    // Clear selected items
+    if (typeof selectedItems !== 'undefined') selectedItems.clear();
 
     // Apply Filters and Sort
     let filteredRepayments = repayments.filter(rep => {
@@ -1151,8 +1154,6 @@ function renderRepaymentVerification() {
 
     // Apply Sort
     filteredRepayments.sort((a, b) => {
-        // Assuming repayments have a timestamp, if not we might need to rely on ID or add a timestamp field
-        // For now, let's assume newer IDs are newer
         if (repaymentFilterState.sort === 'newest') return b.id.localeCompare(a.id);
         if (repaymentFilterState.sort === 'oldest') return a.id.localeCompare(b.id);
         if (repaymentFilterState.sort === 'amount_high') return b.amount - a.amount;
@@ -1160,27 +1161,78 @@ function renderRepaymentVerification() {
         return 0;
     });
 
-    const rows = filteredRepayments.map(rep => `
+    // Mobile card view
+    const mobileCards = typeof renderRepaymentCards === 'function' ? renderRepaymentCards(filteredRepayments) : '';
+    
+    // Check if bulk actions available
+    const hasPendingRepayments = filteredRepayments.some(r => r.status === 'pending');
+
+    const rows = filteredRepayments.map(rep => {
+        // Status display based on current status
+        let statusHtml = '';
+        if (rep.status === 'pending') {
+            statusHtml = `
+                <div class="flex items-center gap-1">
+                    <button onclick="verifyRepayment('${rep.id}')" class="px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition" title="Verify">
+                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="showRejectRepaymentModal('${rep.id}')" class="px-2 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition" title="Reject">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `;
+        } else if (rep.status === 'verified') {
+            statusHtml = `<span class="text-green-600 font-medium text-sm flex items-center gap-1"><i data-lucide="check-circle" class="w-4 h-4"></i> Verified</span>`;
+        } else if (rep.status === 'rejected') {
+            statusHtml = `
+                <div>
+                    <span class="text-red-600 font-medium text-sm flex items-center gap-1"><i data-lucide="x-circle" class="w-4 h-4"></i> Rejected</span>
+                    ${rep.rejectionReason ? `<p class="text-xs text-red-500 mt-1 max-w-32 truncate" title="${rep.rejectionReason}">${rep.rejectionReason}</p>` : ''}
+                </div>
+            `;
+
+        }
+        
+        return `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
+            ${hasPendingRepayments && rep.status === 'pending' ? `
+                <td class="px-4 py-4">
+                    <input type="checkbox" class="bulk-checkbox-repayments w-4 h-4 rounded border-slate-300" 
+                        value="${rep.id}" onchange="toggleSelectItem('${rep.id}', 'repayments')">
+                </td>
+            ` : (hasPendingRepayments ? '<td class="px-4 py-4"></td>' : '')}
             <td class="px-6 py-4 font-medium text-slate-900">${rep.userName || 'Unknown'}</td>
-            <td class="px-6 py-4">৳${rep.amount}</td>
+            <td class="px-6 py-4 font-bold text-green-600">৳${rep.amount}</td>
             <td class="px-6 py-4 text-slate-600">
-                <div>${rep.senderAccount || 'N/A'}</div>
+                <div class="flex items-center gap-1">
+                    <span>${rep.senderAccount || 'N/A'}</span>
+                    ${rep.senderAccount ? `<button onclick="copyToClipboard('${rep.senderAccount}', this)" class="p-1 hover:bg-slate-200 rounded transition text-slate-400 hover:text-slate-600" title="Copy"><i data-lucide="copy" class="w-3 h-3"></i></button>` : ''}
+                </div>
             </td>
-            <td class="px-6 py-4 text-slate-600">${rep.method} (${rep.trxId})</td>
-            <td class="px-6 py-4">
-                ${rep.status === 'pending' ? `
-                    <button onclick="verifyRepayment('${rep.id}')" class="text-green-600 hover:text-green-700 font-medium text-sm">Confirm</button>
-                ` : `
-                    <span class="text-green-600 font-medium text-sm flex items-center gap-1">
-                        <i data-lucide="check-circle" class="w-4 h-4"></i> Verified
-                    </span>
-                `}
+            <td class="px-6 py-4 text-slate-600">
+                <div class="font-medium">${rep.method}</div>
+                <div class="text-xs text-slate-400 flex items-center gap-1">
+                    <span>${rep.trxId}</span>
+                    <button onclick="copyToClipboard('${rep.trxId}', this)" class="p-1 hover:bg-slate-200 rounded transition text-slate-400 hover:text-slate-600" title="Copy TrxID"><i data-lucide="copy" class="w-3 h-3"></i></button>
+                </div>
             </td>
+            <td class="px-6 py-4">${statusHtml}</td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 
     adminContent.innerHTML = `
+        <!-- Bulk Actions Bar -->
+        <div id="bulk-actions-bar-repayments" class="hidden mb-4 bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+            <span class="text-green-800 font-medium">
+                <span id="selected-count-repayments">0</span> repayment(s) selected
+            </span>
+            <button onclick="bulkVerifyRepayments()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                Verify All Selected
+            </button>
+        </div>
+        
         <div class="mb-6 flex flex-col md:flex-row gap-4 justify-between">
             <div class="relative flex-1 max-w-md">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
@@ -1188,27 +1240,38 @@ function renderRepaymentVerification() {
                     oninput="repaymentFilterState.search = this.value; renderRepaymentVerification()"
                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-3 flex-wrap">
                 <select onchange="repaymentFilterState.status = this.value; renderRepaymentVerification()" 
-                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
+                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white text-sm">
                     <option value="all" ${repaymentFilterState.status === 'all' ? 'selected' : ''}>All Status</option>
                     <option value="pending" ${repaymentFilterState.status === 'pending' ? 'selected' : ''}>Pending</option>
                     <option value="verified" ${repaymentFilterState.status === 'verified' ? 'selected' : ''}>Verified</option>
+                    <option value="rejected" ${repaymentFilterState.status === 'rejected' ? 'selected' : ''}>Rejected</option>
                 </select>
                 <select onchange="repaymentFilterState.sort = this.value; renderRepaymentVerification()"
-                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
+                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white text-sm">
                     <option value="newest" ${repaymentFilterState.sort === 'newest' ? 'selected' : ''}>Newest First</option>
                     <option value="oldest" ${repaymentFilterState.sort === 'oldest' ? 'selected' : ''}>Oldest First</option>
                     <option value="amount_high" ${repaymentFilterState.sort === 'amount_high' ? 'selected' : ''}>Amount (High-Low)</option>
                     <option value="amount_low" ${repaymentFilterState.sort === 'amount_low' ? 'selected' : ''}>Amount (Low-High)</option>
                 </select>
+                <button onclick="exportRepayments()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm font-medium transition flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Export</span>
+                </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 border-b border-slate-200">
                     <tr>
+                        ${hasPendingRepayments ? `
+                            <th class="px-4 py-4">
+                                <input type="checkbox" id="select-all-repayments" class="w-4 h-4 rounded border-slate-300" onchange="toggleSelectAll('repayments')">
+                            </th>
+                        ` : ''}
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">User</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Amount</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Sender Account</th>
@@ -1217,9 +1280,14 @@ function renderRepaymentVerification() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${rows.length > 0 ? rows : '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">No repayment records found.</td></tr>'}
+                    ${rows.length > 0 ? rows : '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">No repayment records found.</td></tr>'}
                 </tbody>
             </table>
+        </div>
+        
+        <!-- Mobile Cards -->
+        <div class="md:hidden">
+            ${mobileCards || '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center text-slate-500">No repayment records found.</div>'}
         </div>
     `;
 
@@ -1278,12 +1346,117 @@ function verifyRepayment(repaymentId) {
             window.db.updateLoan(loan);
         }
 
-        alert('Repayment verified successfully!');
+        if (typeof showToast === 'function') {
+            showToast('Repayment verified successfully!', 'success');
+        } else {
+            alert('Repayment verified successfully!');
+        }
         renderAdminView('repayment-verify');
     }
 }
 
+// Reject repayment with reason
+function showRejectRepaymentModal(repaymentId) {
+    const modal = document.getElementById('modal-overlay');
+    const modalContent = document.getElementById('modal-content');
+
+    modalContent.innerHTML = `
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900">Reject Repayment</h3>
+            </div>
+            <p class="text-slate-600 mb-4">Please provide a reason for rejection. This will be visible to the student.</p>
+            
+            <form id="rejectRepaymentForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Quick Reasons</label>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button type="button" onclick="document.getElementById('repaymentRejectionReason').value = 'Duplicate payment - already submitted'" 
+                            class="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-sm font-medium transition">
+                            Duplicate
+                        </button>
+                        <button type="button" onclick="document.getElementById('repaymentRejectionReason').value = 'Amount mismatch - sent amount does not match'" 
+                            class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg text-sm font-medium transition">
+                            Amount Mismatch
+                        </button>
+                        <button type="button" onclick="document.getElementById('repaymentRejectionReason').value = 'Transaction ID not found in records'" 
+                            class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-sm font-medium transition">
+                            TrxID Not Found
+                        </button>
+                        <button type="button" onclick="document.getElementById('repaymentRejectionReason').value = 'Invalid sender account number'" 
+                            class="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition">
+                            Invalid Sender
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Rejection Reason <span class="text-red-500">*</span></label>
+                    <textarea id="repaymentRejectionReason" required rows="3" 
+                        placeholder="Select a quick reason above or type custom reason..."
+                        class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-red-500 outline-none resize-none"></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button type="submit" 
+                        class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        Reject Repayment
+                    </button>
+                    <button type="button" onclick="closeModal()" 
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-lg font-semibold transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+    lucide.createIcons();
+
+    document.getElementById('rejectRepaymentForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const reason = document.getElementById('repaymentRejectionReason').value.trim();
+        if (reason) {
+            rejectRepayment(repaymentId, reason);
+        }
+    });
+}
+
+function rejectRepayment(repaymentId, reason) {
+    const repayment = window.db.getRepayments().find(r => r.id === repaymentId);
+    if (repayment) {
+        repayment.status = 'rejected';
+        repayment.rejectionReason = reason;
+        repayment.rejectedAt = new Date().toISOString();
+        repayment.rejectedBy = 'Admin';
+        window.db.updateRepayment(repayment);
+
+        closeModal();
+        if (typeof showToast === 'function') {
+            showToast('Repayment rejected', 'error');
+        } else {
+            alert('❌ Repayment rejected.');
+        }
+        renderAdminView('repayment-verify');
+    }
+}
+
+// Make reject functions global
+window.showRejectRepaymentModal = showRejectRepaymentModal;
+window.rejectRepayment = rejectRepayment;
+
 function renderAdminDashboard() {
+    // Use enhanced dashboard from admin-improvements.js
+    if (typeof renderEnhancedDashboard === 'function') {
+        renderEnhancedDashboard();
+        return;
+    }
+    
+    // Fallback to original
     const users = window.db.getUsers().filter(u => u.role !== 'admin');
     const loans = window.db.getLoans();
     const repayments = window.db.getRepayments();
@@ -1465,35 +1638,27 @@ function renderUserManagement() {
         return 0;
     });
 
-    const rows = filteredUsers.map(user => `
+    // Mobile card view
+    const mobileCards = typeof renderUserCards === 'function' ? renderUserCards(filteredUsers) : '';
+
+    const rows = filteredUsers.map(user => {
+        const status = user.verificationStatus || (user.isVerified ? 'verified' : 'incomplete');
+        const statusBadge = typeof getStatusBadgeHTML === 'function' ? getStatusBadgeHTML(status) : `<span class="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">${status}</span>`;
+        
+        return `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
             <td class="px-6 py-4">
                 <div class="font-medium text-slate-900">${user.name}</div>
                 <div class="text-sm text-slate-500">${user.email}</div>
             </td>
             <td class="px-6 py-4 text-slate-600">${user.regNo || 'N/A'}</td>
-            <td class="px-6 py-4">
-                <span class="px-3 py-1 rounded-full text-xs font-medium 
-                    ${(() => {
-            const status = user.verificationStatus || (user.isVerified ? 'verified' : 'incomplete');
-            if (status === 'verified') return 'bg-green-100 text-green-700';
-            if (status === 'pending') return 'bg-blue-100 text-blue-700';
-            if (status === 'incomplete') return 'bg-slate-100 text-slate-600';
-            if (status === 'blocked') return 'bg-red-200 text-red-900';
-            if (status === 'rejected') return 'bg-red-100 text-red-700';
-            return 'bg-slate-100 text-slate-600';
-        })()}">
-                    ${(() => {
-            const status = user.verificationStatus || (user.isVerified ? 'verified' : 'incomplete');
-            return status.charAt(0).toUpperCase() + status.slice(1);
-        })()}
-                </span>
-            </td>
+            <td class="px-6 py-4">${statusBadge}</td>
             <td class="px-6 py-4">
                 <button onclick="renderUserDetail('${user.id}')" class="text-primary hover:text-secondary font-medium text-sm">View Details</button>
             </td>
         </tr>
-        `).join('');
+        `;
+    }).join('');
 
     adminContent.innerHTML = `
         <div class="mb-6 flex flex-col md:flex-row gap-4 justify-between">
@@ -1503,9 +1668,9 @@ function renderUserManagement() {
                     oninput="userFilterState.search = this.value; renderUserManagement()"
                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-3 flex-wrap">
                 <select onchange="userFilterState.status = this.value; renderUserManagement()" 
-                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
+                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white text-sm">
                     <option value="all" ${userFilterState.status === 'all' ? 'selected' : ''}>All Status</option>
                     <option value="incomplete" ${userFilterState.status === 'incomplete' ? 'selected' : ''}>Incomplete</option>
                     <option value="pending" ${userFilterState.status === 'pending' ? 'selected' : ''}>Pending Review</option>
@@ -1514,16 +1679,21 @@ function renderUserManagement() {
                     <option value="blocked" ${userFilterState.status === 'blocked' ? 'selected' : ''}>Blocked</option>
                 </select>
                 <select onchange="userFilterState.sort = this.value; renderUserManagement()"
-                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
+                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white text-sm">
                     <option value="newest" ${userFilterState.sort === 'newest' ? 'selected' : ''}>Newest First</option>
                     <option value="oldest" ${userFilterState.sort === 'oldest' ? 'selected' : ''}>Oldest First</option>
                     <option value="name_asc" ${userFilterState.sort === 'name_asc' ? 'selected' : ''}>Name (A-Z)</option>
                     <option value="name_desc" ${userFilterState.sort === 'name_desc' ? 'selected' : ''}>Name (Z-A)</option>
                 </select>
+                <button onclick="exportUsers()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm font-medium transition flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Export</span>
+                </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 border-b border-slate-200">
                     <tr>
@@ -1537,6 +1707,11 @@ function renderUserManagement() {
                     ${rows.length > 0 ? rows : '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No users found.</td></tr>'}
                 </tbody>
             </table>
+        </div>
+        
+        <!-- Mobile Cards -->
+        <div class="md:hidden">
+            ${mobileCards || '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center text-slate-500">No users found.</div>'}
         </div>
     `;
 
@@ -1571,6 +1746,9 @@ let loanFilterState = {
 
 function renderLoanManagement() {
     const loans = window.db.getLoans();
+    
+    // Clear selected items
+    if (typeof selectedItems !== 'undefined') selectedItems.clear();
 
     // Apply Filters and Sort
     let filteredLoans = loans.filter(loan => {
@@ -1588,8 +1766,24 @@ function renderLoanManagement() {
         return 0;
     });
 
-    const rows = filteredLoans.map(loan => `
+    // Mobile card view
+    const mobileCards = typeof renderLoanCards === 'function' ? renderLoanCards(filteredLoans) : '';
+    
+    // Check if bulk actions available (pending loans)
+    const hasPendingLoans = filteredLoans.some(l => l.status === 'pending');
+
+    const rows = filteredLoans.map(loan => {
+        const statusBadge = typeof getStatusBadgeHTML === 'function' ? getStatusBadgeHTML(loan.status) : 
+            `<span class="px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600">${loan.status}</span>`;
+        
+        return `
         <tr class="border-b border-slate-100 hover:bg-slate-50">
+            ${hasPendingLoans && loan.status === 'pending' ? `
+                <td class="px-4 py-4">
+                    <input type="checkbox" class="bulk-checkbox-loans w-4 h-4 rounded border-slate-300" 
+                        value="${loan.id}" onchange="toggleSelectItem('${loan.id}', 'loans')">
+                </td>
+            ` : (hasPendingLoans ? '<td class="px-4 py-4"></td>' : '')}
             <td class="px-6 py-4">
                 <button onclick="renderUserDetail('${loan.userId}')" class="font-medium text-primary hover:text-secondary hover:underline transition text-left">
                     ${loan.userName}
@@ -1598,7 +1792,6 @@ function renderLoanManagement() {
             </td>
             <td class="px-6 py-4">
                 ${(() => {
-            // Check if loan has saved payment duration (for paid loans)
             if (loan.status === 'paid' && loan.paymentDuration) {
                 const daysRemaining = loan.paymentDuration.daysRemaining;
                 if (daysRemaining > 0) {
@@ -1609,62 +1802,46 @@ function renderLoanManagement() {
                     return `<span class="font-medium text-red-600">${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''} late</span>`;
                 }
             }
-
-            // Defaulted loans
-            if (loan.status === 'defaulted') {
-                return '<span class="font-medium text-red-700">Defaulted</span>';
-            }
-
-            // Rejected/Pending/Approved loans - N/A
-            if (loan.status === 'rejected' || loan.status === 'pending' || loan.status === 'approved') {
-                return '<span class="text-slate-500">N/A</span>';
-            }
-
-            // Calculate duration for disbursed/partially_paid loans
-            if (!loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) {
-                return '<span class="text-slate-500">N/A</span>';
-            }
-
+            if (loan.status === 'defaulted') return '<span class="font-medium text-red-700">Defaulted</span>';
+            if (loan.status === 'rejected' || loan.status === 'pending' || loan.status === 'approved') return '<span class="text-slate-500">N/A</span>';
+            if (!loan.disbursementInfo || !loan.disbursementInfo.disbursedAt) return '<span class="text-slate-500">N/A</span>';
             const disbursedDate = new Date(loan.disbursementInfo.disbursedAt);
             const today = new Date();
             disbursedDate.setHours(0, 0, 0, 0);
             today.setHours(0, 0, 0, 0);
-
-            const daysSinceDisbursement = Math.floor((today - disbursedDate) / (1000 * 60 * 60 * 24));
+            const daysSinceDisbursement = Math.floor((today - disbursedDate) / 86400000);
             const daysRemaining = 60 - daysSinceDisbursement;
-
-            if (daysRemaining > 7) {
-                return `<span class="font-medium text-green-600">${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left</span>`;
-            } else if (daysRemaining > 0) {
-                return `<span class="font-medium text-amber-600">${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} left</span>`;
-            } else if (daysRemaining === 0) {
-                return '<span class="font-medium text-amber-600">Due Today</span>';
-            } else {
-                return `<span class="font-medium text-red-600">${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) !== 1 ? 's' : ''} overdue</span>`;
-            }
+            if (daysRemaining > 7) return `<span class="font-medium text-green-600">${daysRemaining} days left</span>`;
+            if (daysRemaining > 0) return `<span class="font-medium text-amber-600">${daysRemaining} days left</span>`;
+            if (daysRemaining === 0) return '<span class="font-medium text-amber-600">Due Today</span>';
+            return `<span class="font-medium text-red-600">${Math.abs(daysRemaining)} days overdue</span>`;
         })()}
             </td>
             <td class="px-6 py-4 text-slate-600">${new Date(loan.appliedAt).toLocaleDateString()}</td>
-            <td class="px-6 py-4">
-                <span class="px-3 py-1 rounded-full text-xs font-medium 
-                    ${loan.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-            loan.status === 'approved' ? 'bg-blue-100 text-blue-700' :
-                loan.status === 'disbursed' ? 'bg-green-100 text-green-700' :
-                    loan.status === 'partially_paid' ? 'bg-cyan-100 text-cyan-700' :
-                        loan.status === 'paid' ? 'bg-emerald-100 text-emerald-700' :
-                            loan.status === 'rejected' ? 'bg-slate-100 text-slate-700' :
-                                loan.status === 'defaulted' ? 'bg-red-200 text-red-800' :
-                                    'bg-slate-100 text-slate-600'}">
-                    ${loan.status.replace('_', ' ').toUpperCase()}
-                </span>
-            </td>
+            <td class="px-6 py-4">${statusBadge}</td>
             <td class="px-6 py-4">
                 <button onclick="renderLoanDetail('${loan.id}')" class="text-primary hover:text-secondary font-medium text-sm">View Details</button>
             </td>
         </tr>
-        `).join('');
+        `;
+    }).join('');
 
     adminContent.innerHTML = `
+        <!-- Bulk Actions Bar -->
+        <div id="bulk-actions-bar-loans" class="hidden mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+            <span class="text-blue-800 font-medium">
+                <span id="selected-count-loans">0</span> loan(s) selected
+            </span>
+            <div class="flex gap-2">
+                <button onclick="bulkApproveLoans()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition">
+                    Approve All
+                </button>
+                <button onclick="bulkRejectLoans()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
+                    Reject All
+                </button>
+            </div>
+        </div>
+        
         <div class="mb-6 flex flex-col md:flex-row gap-4 justify-between">
             <div class="relative flex-1 max-w-md">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"></i>
@@ -1672,9 +1849,9 @@ function renderLoanManagement() {
                     oninput="loanFilterState.search = this.value; renderLoanManagement()"
                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none">
             </div>
-            <div class="flex gap-3">
+            <div class="flex gap-3 flex-wrap">
                 <select onchange="loanFilterState.status = this.value; renderLoanManagement()" 
-                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
+                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white text-sm">
                     <option value="all" ${loanFilterState.status === 'all' ? 'selected' : ''}>All Status</option>
                     <option value="pending" ${loanFilterState.status === 'pending' ? 'selected' : ''}>Pending</option>
                     <option value="approved" ${loanFilterState.status === 'approved' ? 'selected' : ''}>Approved</option>
@@ -1685,19 +1862,29 @@ function renderLoanManagement() {
                     <option value="rejected" ${loanFilterState.status === 'rejected' ? 'selected' : ''}>Rejected</option>
                 </select>
                 <select onchange="loanFilterState.sort = this.value; renderLoanManagement()"
-                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white">
+                    class="px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary outline-none bg-white text-sm">
                     <option value="newest" ${loanFilterState.sort === 'newest' ? 'selected' : ''}>Newest First</option>
                     <option value="oldest" ${loanFilterState.sort === 'oldest' ? 'selected' : ''}>Oldest First</option>
                     <option value="amount_high" ${loanFilterState.sort === 'amount_high' ? 'selected' : ''}>Amount (High-Low)</option>
                     <option value="amount_low" ${loanFilterState.sort === 'amount_low' ? 'selected' : ''}>Amount (Low-High)</option>
                 </select>
+                <button onclick="exportLoans()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 text-sm font-medium transition flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Export</span>
+                </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 border-b border-slate-200">
                     <tr>
+                        ${hasPendingLoans ? `
+                            <th class="px-4 py-4">
+                                <input type="checkbox" id="select-all-loans" class="w-4 h-4 rounded border-slate-300" onchange="toggleSelectAll('loans')">
+                            </th>
+                        ` : ''}
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Applicant</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Duration to Pay</th>
                         <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase">Date</th>
@@ -1706,9 +1893,14 @@ function renderLoanManagement() {
                     </tr>
                 </thead>
                 <tbody>
-                    ${rows.length > 0 ? rows : '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">No loans found.</td></tr>'}
+                    ${rows.length > 0 ? rows : '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-500">No loans found.</td></tr>'}
                 </tbody>
             </table>
+        </div>
+        
+        <!-- Mobile Cards -->
+        <div class="md:hidden">
+            ${mobileCards || '<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center text-slate-500">No loans found.</div>'}
         </div>
     `;
 
@@ -2031,6 +2223,33 @@ function addCallLogToLoan(loanId) {
 function renderVerificationManagement() {
     const pendingVerifications = window.db.getPendingVerifications();
 
+    // Use compact verification cards from admin-improvements.js
+    if (typeof renderCompactVerificationCards === 'function') {
+        adminContent.innerHTML = `
+            <div class="mb-6 flex items-center justify-between">
+                <p class="text-slate-600">
+                    <span class="font-bold text-primary">${pendingVerifications.length}</span>
+                    student${pendingVerifications.length !== 1 ? 's' : ''} awaiting verification
+                </p>
+                ${pendingVerifications.length > 1 ? `
+                    <button onclick="bulkApproveVerifications()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Approve All (${pendingVerifications.length})
+                    </button>
+                ` : ''}
+            </div>
+            ${renderCompactVerificationCards(pendingVerifications)}
+            
+            <!-- Reject Modal -->
+            <div id="reject-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div id="reject-modal-content" class="bg-white rounded-xl shadow-xl max-w-md w-full"></div>
+            </div>
+        `;
+        lucide.createIcons();
+        return;
+    }
+
+    // Fallback to original
     if (pendingVerifications.length === 0) {
         adminContent.innerHTML = `
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">

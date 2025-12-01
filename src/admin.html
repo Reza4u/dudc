@@ -26,12 +26,16 @@
 <body class="bg-slate-100 flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col z-10">
+    <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col z-10">
         <div class="h-20 flex items-center px-6 border-b border-slate-800">
             <div
                 class="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold mr-3">
                 A</div>
             <span class="font-bold text-lg text-white">Admin Panel</span>
+            <!-- Close button for mobile -->
+            <button class="ml-auto md:hidden text-slate-400 hover:text-white" onclick="closeMobileSidebar()">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -72,10 +76,14 @@
     <!-- Main Content -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <!-- Header -->
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-20">
-            <h2 class="text-xl font-bold text-slate-800" id="pageTitle">Dashboard</h2>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 z-20">
+            <!-- Mobile menu button -->
+            <button class="md:hidden text-slate-600 hover:text-primary mr-4" id="mobileMenuBtn" onclick="openMobileSidebar()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <h2 class="text-lg md:text-xl font-bold text-slate-800" id="pageTitle">Dashboard</h2>
+            <div class="flex items-center gap-2 md:gap-4">
+                <div class="text-right hidden sm:block">
                     <p class="text-sm font-bold text-slate-900">Admin User</p>
                     <p class="text-xs text-slate-500">Super Admin</p>
                 </div>
@@ -86,10 +94,13 @@
         </header>
 
         <!-- Content Area -->
-        <div id="admin-content" class="flex-1 overflow-y-auto p-8">
+        <div id="admin-content" class="flex-1 overflow-y-auto p-4 md:p-8">
             <!-- Dynamic Content -->
         </div>
     </main>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onclick="closeMobileSidebar()"></div>
 
     <!-- Modal Overlay -->
     <div id="modal-overlay"
@@ -105,14 +116,58 @@
 
     <script src="assets/js/data.js"></script>
     <script src="assets/js/auth.js"></script>
-    <script src="assets/js/loan-detail-config.js"></script>
-    <script src="assets/js/loan-detail-renderer.js"></script>
-    <script src="assets/js/admin.js?v=1.1"></script>
+    <script src="assets/js/loan-detail-config.js?v=2.1"></script>
+    <script src="assets/js/loan-detail-renderer.js?v=2.1"></script>
+    <script src="assets/js/admin-improvements.js?v=1.0"></script>
+    <script src="assets/js/admin.js?v=2.2"></script>
     <script>
+        lucide.createIcons();
+        
         document.addEventListener('DOMContentLoaded', () => {
             // Check if admin
             auth.checkAdmin();
             renderAdminView('dashboard');
+            
+            // Close menu when clicking nav items on mobile
+            const sidebar = document.getElementById('sidebar');
+            const navItems = sidebar.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+        });
+
+        function openMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            sidebar.classList.remove('hidden');
+            sidebar.classList.add('flex', 'absolute', 'inset-y-0', 'left-0', 'z-50', 'shadow-2xl');
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            sidebar.classList.add('hidden');
+            sidebar.classList.remove('flex', 'absolute', 'inset-y-0', 'left-0', 'z-50', 'shadow-2xl');
+            overlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close sidebar on window resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                const overlay = document.getElementById('mobile-overlay');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
         });
     </script>
 </body>
